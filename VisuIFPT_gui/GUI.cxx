@@ -14,8 +14,11 @@
 #include <qfiledialog.h>
 #include "Reader.h"
 #include <vtkPLYReader.h>
+#include <vtkAxesActor.h>
+#include <vtkOrientationMarkerWidget.h>
 
 #include "QVTKInteractor.h"
+
 
 GUI::GUI()
 {
@@ -41,6 +44,19 @@ GUI::GUI()
 	connect(popup1, SIGNAL(triggered(QAction*)), this, SLOT(color1(QAction*)));
 
 	connect(actionOpen_File, SIGNAL(triggered()), this, SLOT(openFile()));
+	
+	vtkAxesActor* axes = vtkAxesActor::New();
+
+	vtkOrientationMarkerWidget* widget = vtkOrientationMarkerWidget::New();
+
+	widget->SetOutlineColor(0.9300, 0.5700, 0.1300);
+	widget->SetOrientationMarker(axes);
+	widget->SetInteractor(VTKViewer->GetRenderWindow()->GetInteractor());
+	widget->SetViewport(0.0, 0.0, 0.12, 0.12);
+	widget->SetEnabled(1);
+	widget->InteractiveOn();
+
+	
 
 
 	//--------------------------- CONNECTIONS -----------------------------------------
@@ -157,6 +173,15 @@ void GUI::openFile() {
 	else if (filename.find(".pcd") != std::string::npos) {
 		readPCD(polymapper, filename);
 	}
+
+	char* file = new char[50];
+	char* ext = new char[10];
+	_splitpath(filename.c_str(), NULL, NULL, file, ext);
+	std::string s_file = file;
+	std::string s_ext = ext;
+
+	QTreeWidgetItem* new_actor = new QTreeWidgetItem(treeWidget, 2);
+	new_actor->setText(0, QString::fromStdString(s_file + s_ext));
 
 	vtkSmartPointer<vtkActor> actor1 =
 		vtkSmartPointer<vtkActor>::New();
