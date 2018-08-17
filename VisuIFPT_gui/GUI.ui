@@ -111,7 +111,21 @@
     <addaction name="actionOpen_File"/>
     <addaction name="actionE_xit"/>
    </widget>
+   <widget class="QMenu" name="menuAdd">
+    <property name="title">
+     <string>Add</string>
+    </property>
+    <widget class="QMenu" name="menuGeometric_Primitives">
+     <property name="title">
+      <string>Geometric Primitives</string>
+     </property>
+     <addaction name="spawnPlane"/>
+     <addaction name="spawnCube"/>
+    </widget>
+    <addaction name="menuGeometric_Primitives"/>
+   </widget>
    <addaction name="menu_File"/>
+   <addaction name="menuAdd"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionExit">
@@ -132,6 +146,16 @@
   <action name="actionOpen_File">
    <property name="text">
     <string>Open File</string>
+   </property>
+  </action>
+  <action name="spawnPlane">
+   <property name="text">
+    <string>Plane</string>
+   </property>
+  </action>
+  <action name="spawnCube">
+   <property name="text">
+    <string>Cube</string>
    </property>
   </action>
  </widget>

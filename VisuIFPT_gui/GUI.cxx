@@ -16,8 +16,43 @@
 #include <vtkPLYReader.h>
 #include <vtkAxesActor.h>
 #include <vtkOrientationMarkerWidget.h>
+#include <vtkPlaneSource.h>
+#include <vtkCubeSource.h>
+#include <vtkShrinkFilter.h>
+#include <vtkNamedColors.h>
+#include <vtkDataSetMapper.h>
+#include <vtkProperty.h>
+#include <vtkInteractorStyleSwitch.h>
+
 
 #include "QVTKInteractor.h"
+
+//initialize static counters for geometric primitives (just for naming purposes)
+int GUI::pri_planeCount = 0;
+int GUI::pri_cubeCount = 0;
+
+//Simple constructor for derived class we need
+vtkInteractorMode* vtkInteractorMode::New() {		
+	return new vtkInteractorMode();			
+}
+
+
+//Put in two strings and function puts out current interactorstyles
+void vtkInteractorMode::getMode(std::string &cam_or_ac, std::string &joy_or_track) {			
+	if (JoystickOrTrackball == 0) {						//we access the protected variables of the base class
+		joy_or_track = "Joystick";					
+	}
+	else {
+		joy_or_track = "Trackball";
+	}
+
+	if (CameraOrActor == 0) {
+		cam_or_ac = "Camera";
+	}
+	else {
+		cam_or_ac = "Actor";
+	}
+}
 
 
 GUI::GUI()
@@ -31,10 +66,14 @@ GUI::GUI()
 	VTKViewer->SetRenderWindow(renwin);
 	renwin->Delete();
 
-	// add a renderer
+	//add a renderer
 	Ren1 = vtkRenderer::New();
 	VTKViewer->GetRenderWindow()->AddRenderer(Ren1);
 
+	//add an InteractionMode (derivitive from InteractionStyleSwitch) and set default to trackball_camera
+	style = style->New();
+	style->SetCurrentStyleToTrackballCamera();
+	VTKViewer->GetRenderWindow()->GetInteractor()->SetInteractorStyle(style);
 
 	// add a popup menu for the window and connect it to our slot
 	QMenu* popup1 = new QMenu(VTKViewer);
@@ -43,12 +82,15 @@ GUI::GUI()
 	popup1->addAction("Stereo Rendering");
 	connect(popup1, SIGNAL(triggered(QAction*)), this, SLOT(color1(QAction*)));
 
+	//connection from (button) QAction* Open_File to the SLOT with function openFile(), when triggered
 	connect(actionOpen_File, SIGNAL(triggered()), this, SLOT(openFile()));
+
+	//same connection as above, but we process the press on the menu and the following press on the QAction* in the SLOT-function
+	connect(menuGeometric_Primitives, SIGNAL(triggered(QAction*)), this, SLOT(spawnPrimitive(QAction*)));
 	
+	//creating a OrientationMarkerWidget
 	vtkAxesActor* axes = vtkAxesActor::New();
-
 	vtkOrientationMarkerWidget* widget = vtkOrientationMarkerWidget::New();
-
 	widget->SetOutlineColor(0.9300, 0.5700, 0.1300);
 	widget->SetOrientationMarker(axes);
 	widget->SetInteractor(VTKViewer->GetRenderWindow()->GetInteractor());
@@ -57,9 +99,8 @@ GUI::GUI()
 	widget->InteractiveOn();
 
 	
-
-
 	//--------------------------- CONNECTIONS -----------------------------------------
+
 	Connections = vtkEventQtSlotConnect::New();
 
 	// get right mouse pressed with high priority
@@ -81,11 +122,10 @@ GUI::GUI()
 GUI::~GUI()
 {
 	Ren1->Delete();
-
 	Connections->Delete();
 }
 
-
+//test comment
 void GUI::updateCoords(vtkObject* obj)
 {
 	// get interactor
@@ -93,9 +133,13 @@ void GUI::updateCoords(vtkObject* obj)
 	// get event position
 	int event_pos[2];
 	iren->GetEventPosition(event_pos);
+
+	std::string ac_or_cam, joy_or_tra;
+	style->getMode(ac_or_cam, joy_or_tra);
+
 	// update label
 	QString str;
-	str.sprintf("x=%d : y=%d", event_pos[0], event_pos[1]);
+	str.sprintf("Mode:  %s     %s                      x=%d : y=%d", ac_or_cam.c_str(), joy_or_tra.c_str(), event_pos[0], event_pos[1]);
 	coord->setText(str);
 }
 
@@ -180,7 +224,7 @@ void GUI::openFile() {
 	std::string s_file = file;
 	std::string s_ext = ext;
 
-	QTreeWidgetItem* new_actor = new QTreeWidgetItem(treeWidget, 2);
+	QTreeWidgetItem* new_actor = new QTreeWidgetItem(treeWidget, 1);
 	new_actor->setText(0, QString::fromStdString(s_file + s_ext));
 
 	vtkSmartPointer<vtkActor> actor1 =
@@ -188,4 +232,49 @@ void GUI::openFile() {
 	actor1->SetMapper(polymapper);
 	Ren1->AddViewProp(actor1);
 	VTKViewer->update();
+}
+
+void GUI::spawnPrimitive(QAction* primitive) {					// TODO: maybe even outsource the vtkPolyData (which we create in every if-case equally)?
+
+	polymapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+
+	QTreeWidgetItem* new_actor = new QTreeWidgetItem(treeWidget, 1);
+
+	if (primitive->text() == "Plane") {
+
+		vtkSmartPointer<vtkPlaneSource> planeSource =
+			vtkSmartPointer<vtkPlaneSource>::New();
+		planeSource->SetCenter(0.0, 0.0, 0.0);
+		planeSource->SetNormal(1.0, 0.0, 1.0);
+		planeSource->Update();
+
+		vtkPolyData* plane = planeSource->GetOutput();
+		polymapper->SetInputData(plane);
+		GUI::pri_planeCount++;
+
+	
+		new_actor->setText(0, QString::fromStdString("Plane" + std::to_string(GUI::pri_planeCount)));
+
+	}
+	else if (primitive->text() == "Cube") {
+
+		vtkSmartPointer<vtkCubeSource> cubeSource =
+			vtkSmartPointer<vtkCubeSource>::New();
+		cubeSource->SetCenter(0.0, 0.0, 0.0);
+		cubeSource->Update();
+
+		vtkPolyData* cube = cubeSource->GetOutput();
+		polymapper->SetInputData(cube);
+		GUI::pri_cubeCount++;
+
+		new_actor->setText(0, QString::fromStdString("Cube" + std::to_string(GUI::pri_cubeCount)));
+	}
+
+	vtkSmartPointer<vtkActor> actor =
+		vtkSmartPointer<vtkActor>::New();
+	actor->SetMapper(polymapper);
+
+	Ren1->AddViewProp(actor);
+	VTKViewer->update();
+	
 }
