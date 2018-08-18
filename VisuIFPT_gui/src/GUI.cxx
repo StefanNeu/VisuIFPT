@@ -28,18 +28,21 @@
 
 #include "QVTKInteractor.h"
 
+
 //initialize static counters for geometric primitives (just for naming purposes)
 int GUI::pri_planeCount = 0;
 int GUI::pri_cubeCount = 0;
 
+
+//---------------------------- SOME DERIVED CLASSES WE NEED-----------------------------------------------
+
 //Simple constructor for derived class we need
-vtkInteractorMode* vtkInteractorMode::New() {		
-	return new vtkInteractorMode();			
+vtk_InteractorMode* vtk_InteractorMode::New() {		
+	return new vtk_InteractorMode();			
 }
 
-
 //Put in two strings and function puts out current interactorstyles
-void vtkInteractorMode::getMode(std::string &cam_or_ac, std::string &joy_or_track) {			
+void vtk_InteractorMode::getMode(std::string &cam_or_ac, std::string &joy_or_track) {			
 	if (JoystickOrTrackball == 0) {						//we access the protected variables of the base class
 		joy_or_track = "Joystick";					
 	}
@@ -54,6 +57,11 @@ void vtkInteractorMode::getMode(std::string &cam_or_ac, std::string &joy_or_trac
 		cam_or_ac = "Actor";
 	}
 }
+
+
+
+
+
 
 
 GUI::GUI()
@@ -229,21 +237,22 @@ void GUI::openFile() {
 	std::string s_file = file;
 	std::string s_ext = ext;
 
-	QTreeWidgetItem* new_actor = new QTreeWidgetItem(treeWidget, 1);
+	vtkSmartPointer<vtkActor> actor =
+		vtkSmartPointer<vtkActor>::New();
+	actor->SetMapper(polymapper);
+	Ren1->AddViewProp(actor);
+
+	Q_actorTreeWidgetItem* new_actor = new Q_actorTreeWidgetItem(treeWidget, actor, 1);
+
 	new_actor->setText(0, QString::fromStdString(s_file + s_ext));
 
-	vtkSmartPointer<vtkActor> actor1 =
-		vtkSmartPointer<vtkActor>::New();
-	actor1->SetMapper(polymapper);
-	Ren1->AddViewProp(actor1);
 	VTKViewer->update();
 }
 
 void GUI::spawnPrimitive(QAction* primitive) {					// TODO: maybe even outsource the vtkPolyData (which we create in every if-case equally)?
 
 	polymapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-
-	QTreeWidgetItem* new_actor = new QTreeWidgetItem(treeWidget, 1);
+	std::string item_name;
 
 	if (primitive->text() == "Plane") {
 
@@ -257,8 +266,8 @@ void GUI::spawnPrimitive(QAction* primitive) {					// TODO: maybe even outsource
 		polymapper->SetInputData(plane);
 		GUI::pri_planeCount++;
 
-	
-		new_actor->setText(0, QString::fromStdString("Plane" + std::to_string(GUI::pri_planeCount)));
+		item_name = "Plane" + std::to_string(GUI::pri_planeCount);
+		//new_actor->setText(0, QString::fromStdString("Plane" + std::to_string(GUI::pri_planeCount)));
 
 	}
 	else if (primitive->text() == "Cube") {
@@ -272,14 +281,18 @@ void GUI::spawnPrimitive(QAction* primitive) {					// TODO: maybe even outsource
 		polymapper->SetInputData(cube);
 		GUI::pri_cubeCount++;
 
-		new_actor->setText(0, QString::fromStdString("Cube" + std::to_string(GUI::pri_cubeCount)));
+		item_name = "Cube" + std::to_string(GUI::pri_planeCount);
+		//new_actor->setText(0, QString::fromStdString("Cube" + std::to_string(GUI::pri_cubeCount)));
 	}
 
 	vtkSmartPointer<vtkActor> actor =
 		vtkSmartPointer<vtkActor>::New();
 	actor->SetMapper(polymapper);
-
 	Ren1->AddViewProp(actor);
+
+	Q_actorTreeWidgetItem* new_actor = new Q_actorTreeWidgetItem(treeWidget, actor, 1);
+	new_actor->setText(0, QString::fromStdString(item_name));
+
 	VTKViewer->update();
 	
 }
@@ -289,25 +302,36 @@ void GUI::renameActor() {
 	treeWidget->editItem(actorlist_contextmenu_item, 0);
 }
 
-void GUI::prepareMenu(const QPoint & pos)					// TODO: test if there is an item! right now app crashes if there is no item
+void GUI::deleteActor() {
+	
+	Ren1->RemoveActor(actorlist_contextmenu_item->getActorReference());
+	delete actorlist_contextmenu_item;
+
+	VTKViewer->update();
+}
+
+void GUI::prepareMenu(const QPoint & pos)				
 {
+	vtkSmartPointer<vtkActorCollection> actors =
+		vtkSmartPointer<vtkActorCollection>::New();
+	actors = Ren1->GetActors();
+	actors->PrintSelf(cout, vtkIndent());
+
 	if (treeWidget->itemAt(pos) != NULL) {
-		actorlist_contextmenu_item = treeWidget->itemAt(pos);
+
+		actorlist_contextmenu_item = dynamic_cast<Q_actorTreeWidgetItem*>(treeWidget->itemAt(pos));
 
 
 		QAction *renameAct = new QAction(QString("Rename"), this);
 		QAction *deleteAct = new QAction(QString("Communism works and I can prove it"), this);
 
-
 		connect(renameAct, SIGNAL(triggered()), this, SLOT(renameActor()));
-		//connect(deleteAct, SIGNAL(triggered()), this, SLOT(deleteActor(nd)));
-
+		connect(deleteAct, SIGNAL(triggered()), this, SLOT(deleteActor()));
 
 		QMenu menu(this);
 		menu.addAction(renameAct);
 		menu.addAction(deleteAct);
 
-		//QPoint pt(pos);
 		menu.exec(treeWidget->mapToGlobal(pos));
 	}
 }

@@ -17,10 +17,25 @@ class vtkObject;
 class vtkCommand;
 
 //we need this derived class to access protected members "JoystickOrCamera" and "CameraOrActor" of base class
-class vtkInteractorMode : public vtkInteractorStyleSwitch {
+class vtk_InteractorMode : public vtkInteractorStyleSwitch {
 public:
-	vtkInteractorMode* New();
+	vtk_InteractorMode* New();
 	void getMode(std::string&, std::string&);
+};
+
+class Q_actorTreeWidgetItem : public QTreeWidgetItem {
+public:
+
+	Q_actorTreeWidgetItem(QTreeWidget* view, vtkActor* referenced_actor, int type = 1) : QTreeWidgetItem(view, type){
+		refToActor = referenced_actor;
+	}
+
+	vtkActor* getActorReference() {
+		return refToActor;
+	}
+
+private:
+	vtkActor * refToActor;
 };
 
 class GUI : public QMainWindow, public Ui::GUI
@@ -41,6 +56,7 @@ public slots:
 	void spawnPrimitive(QAction*);
 	void prepareMenu(const QPoint&);
 	void renameActor();
+	void deleteActor();
 
 protected:
 	//currently our only renderer of the scene
@@ -58,10 +74,10 @@ private:
 	static int pri_planeCount;
 
 	//the interaction style of our window
-	vtkInteractorMode* style;
+	vtk_InteractorMode* style;
 
 	//public treewidgetitem that we assign when we open a context menu on a item of the actorlist
-	QTreeWidgetItem* actorlist_contextmenu_item;
+	Q_actorTreeWidgetItem* actorlist_contextmenu_item;
 	
 };
 
