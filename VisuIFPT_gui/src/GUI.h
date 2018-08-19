@@ -51,12 +51,12 @@ public slots:
 	void popup(vtkObject * obj, unsigned long,
 		void * client_data, void *,
 		vtkCommand * command);
-	void color1(QAction*);
 	void openFile();
 	void spawnPrimitive(QAction*);
 	void prepareMenu(const QPoint&);
 	void renameActor();
 	void deleteActor();
+	void displayTransformData(QTreeWidgetItem*);
 
 protected:
 	//currently our only renderer of the scene

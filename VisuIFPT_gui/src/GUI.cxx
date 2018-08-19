@@ -68,12 +68,9 @@ GUI::GUI()
 {
 	this->setupUi(this);
 
-	//treeWidget->setSortingEnabled(true);
-	//treeWidget->sortByColumn(0);
 
 	// create a window to make it stereo capable and give it to QVTKWidget
 	vtkRenderWindow* renwin = vtkRenderWindow::New();
-	//renwin->StereoCapableWindowOn();
 
 	VTKViewer->SetRenderWindow(renwin);
 	renwin->Delete();
@@ -86,20 +83,6 @@ GUI::GUI()
 	style = style->New();
 	style->SetCurrentStyleToTrackballCamera();
 	VTKViewer->GetRenderWindow()->GetInteractor()->SetInteractorStyle(style);
-
-	// add a popup menu for the window and connect it to our slot
-	QMenu* popup1 = new QMenu(VTKViewer);
-	popup1->addAction("Background White");
-	popup1->addAction("Background Black");
-	popup1->addAction("Stereo Rendering");
-	connect(popup1, SIGNAL(triggered(QAction*)), this, SLOT(color1(QAction*)));
-
-	//connection from (button) QAction* Open_File to the SLOT with function openFile(), when triggered
-	connect(actionOpen_File, SIGNAL(triggered()), this, SLOT(openFile()));
-
-	//same connection as above, but we process the press on the menu and the following press on the QAction* in the SLOT-function
-	connect(menuGeometric_Primitives, SIGNAL(triggered(QAction*)), this, SLOT(spawnPrimitive(QAction*)));
-	connect(treeWidget, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(prepareMenu(const QPoint&)));
 	
 	//creating a OrientationMarkerWidget
 	vtkAxesActor* axes = vtkAxesActor::New();
@@ -114,14 +97,18 @@ GUI::GUI()
 	
 	//--------------------------- CONNECTIONS -----------------------------------------
 
-	Connections = vtkEventQtSlotConnect::New();
+	//connection from (button) QAction* Open_File to the SLOT with function openFile(), when triggered
+	connect(actionOpen_File, SIGNAL(triggered()), this, SLOT(openFile()));
 
-	// get right mouse pressed with high priority
-	Connections->Connect(VTKViewer->GetRenderWindow()->GetInteractor(),
-		vtkCommand::RightButtonPressEvent,
-		this,
-		SLOT(popup(vtkObject*, unsigned long, void*, void*, vtkCommand*)),
-		popup1, 1.0);
+	//same connection as above, but we process the press on the menu and the following press on the QAction* in the SLOT-function
+	connect(menuGeometric_Primitives, SIGNAL(triggered(QAction*)), this, SLOT(spawnPrimitive(QAction*)));
+
+	//connection for context menu in our actors-list
+	connect(treeWidget, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(prepareMenu(const QPoint&)));
+
+	connect(treeWidget, SIGNAL(itemClicked(QTreeWidgetItem *)), this, SLOT(displayTransformData(QTreeWidgetItem*)));
+
+	Connections = vtkEventQtSlotConnect::New();
 
 	// update coords as we move through the window
 	Connections->Connect(VTKViewer->GetRenderWindow()->GetInteractor(),
@@ -136,6 +123,19 @@ GUI::~GUI()
 {
 	Ren1->Delete();
 	Connections->Delete();
+}
+
+void GUI::displayTransformData(QTreeWidgetItem* item) {
+
+
+	Q_actorTreeWidgetItem* actor_item = dynamic_cast<Q_actorTreeWidgetItem*>(item);
+	vtkSmartPointer<vtkActor> actor =
+		vtkSmartPointer<vtkActor>::New();
+	actor = actor_item->getActorReference();
+	double* position = new double[3];
+	position = actor->GetOrigin();
+
+	x_loc->setText(QString(std::to_string( position[0]).c_str() ));
 }
 
 //test comment
@@ -187,19 +187,7 @@ void GUI::popup(vtkObject * obj, unsigned long,
 	QPoint global_pt = popupMenu->parentWidget()->mapToGlobal(pt);
 	// show popup menu at global point
 	popupMenu->popup(global_pt);
-}
 
-void GUI::color1(QAction* color)
-{
-	if (color->text() == "Background White")
-		Ren1->SetBackground(1, 1, 1);
-	else if (color->text() == "Background Black")
-		Ren1->SetBackground(0, 0, 0);
-	else if (color->text() == "Stereo Rendering")
-	{
-		Ren1->GetRenderWindow()->SetStereoRender(!Ren1->GetRenderWindow()->GetStereoRender());
-	}
-	VTKViewer->update();
 }
 
 void GUI::openFile() {
