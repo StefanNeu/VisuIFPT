@@ -7,7 +7,7 @@
 #include "vtkConeSource.h"
 #include "vtkEventQtSlotConnect.h"
 #include "vtkPolyDataMapper.h"
-#include "vtkRenderWindow.h"
+#include <vtkGenericOpenGLRenderWindow.h>
 #include "vtkRenderer.h"
 
 #include <istream>
@@ -24,6 +24,9 @@
 #include <vtkProperty.h>
 #include <vtkInteractorStyleSwitch.h>
 #include <qtreewidget.h>
+#include <vtkTransform.h>
+#include <sstream>
+#include <iomanip> 
 
 
 #include "QVTKInteractor.h"
@@ -70,7 +73,7 @@ GUI::GUI()
 
 
 	// create a window to make it stereo capable and give it to QVTKWidget
-	vtkRenderWindow* renwin = vtkRenderWindow::New();
+	vtkGenericOpenGLRenderWindow* renwin = vtkGenericOpenGLRenderWindow::New();				//very bad anti-aliasing with opengl instead of "default" render window!
 
 	VTKViewer->SetRenderWindow(renwin);
 	renwin->Delete();
@@ -106,7 +109,7 @@ GUI::GUI()
 	//connection for context menu in our actors-list
 	connect(treeWidget, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(prepareMenu(const QPoint&)));
 
-	connect(treeWidget, SIGNAL(itemClicked(QTreeWidgetItem *)), this, SLOT(displayTransformData(QTreeWidgetItem*)));
+	connect(treeWidget, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this, SLOT(displayTransformData(QTreeWidgetItem*, int)));
 
 	Connections = vtkEventQtSlotConnect::New();
 
@@ -125,17 +128,37 @@ GUI::~GUI()
 	Connections->Delete();
 }
 
-void GUI::displayTransformData(QTreeWidgetItem* item) {
-
+void GUI::displayTransformData(QTreeWidgetItem* item, int) {
 
 	Q_actorTreeWidgetItem* actor_item = dynamic_cast<Q_actorTreeWidgetItem*>(item);
 	vtkSmartPointer<vtkActor> actor =
 		vtkSmartPointer<vtkActor>::New();
 	actor = actor_item->getActorReference();
-	double* position = new double[3];
-	position = actor->GetOrigin();
 
-	x_loc->setText(QString(std::to_string( position[0]).c_str() ));
+	/*vtkSmartPointer<vtkTransform> transform1 =
+		vtkSmartPointer<vtkTransform>::New();
+	transform1->Translate(10.0, 0.0, 0.0);
+	actor->SetUserTransform(transform1);
+	*/
+
+	actor->AddPosition(10.0, 10.0, 0.0);				//just for testing! we dont want to move actor evertytime we click on an item in the actor list
+
+	double* position = new double[3];
+	position = actor->GetPosition();
+	
+	std::string x_string = std::to_string(position[0]);
+	x_string = x_string.substr(0, x_string.size() - 4);
+
+	std::string y_string = std::to_string(position[1]);
+	y_string = y_string.substr(0, y_string.size() - 4);
+
+	std::string z_string = std::to_string(position[2]);
+	z_string = z_string.substr(0, z_string.size() - 4);
+
+
+	x_loc->setText(QString(x_string.c_str()));
+	y_loc->setText(QString(y_string.c_str()));
+	z_loc->setText(QString(z_string.c_str()));
 }
 
 //test comment
@@ -275,6 +298,7 @@ void GUI::spawnPrimitive(QAction* primitive) {					// TODO: maybe even outsource
 
 	vtkSmartPointer<vtkActor> actor =
 		vtkSmartPointer<vtkActor>::New();
+	
 	actor->SetMapper(polymapper);
 	Ren1->AddViewProp(actor);
 

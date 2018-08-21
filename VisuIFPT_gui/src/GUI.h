@@ -56,7 +56,7 @@ public slots:
 	void prepareMenu(const QPoint&);
 	void renameActor();
 	void deleteActor();
-	void displayTransformData(QTreeWidgetItem*);
+	void displayTransformData(QTreeWidgetItem*, int);
 
 protected:
 	//currently our only renderer of the scene
