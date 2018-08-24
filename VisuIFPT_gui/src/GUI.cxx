@@ -66,9 +66,10 @@ void vtk_InteractorMode::getMode(std::string &cam_or_ac, std::string &joy_or_tra
 
 
 
-
+//#Constructor of our main window.
 GUI::GUI()
 {
+	//sets up all qt objects (see ui_GUI.h)
 	this->setupUi(this);
 
 
@@ -109,8 +110,11 @@ GUI::GUI()
 	//connection for context menu in our actors-list
 	connect(treeWidget, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(prepareMenu(const QPoint&)));
 
+	//updating the transform-data in the inspector, when item in actors-list is clicked
 	connect(treeWidget, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this, SLOT(displayTransformData(QTreeWidgetItem*, int)));
 
+
+	//TODO: maybe put the connection above in this object?
 	Connections = vtkEventQtSlotConnect::New();
 
 	// update coords as we move through the window
@@ -128,6 +132,7 @@ GUI::~GUI()
 	Connections->Delete();
 }
 
+//#Slot for transform-data.
 void GUI::displayTransformData(QTreeWidgetItem* item, int) {
 
 	Q_actorTreeWidgetItem* actor_item = dynamic_cast<Q_actorTreeWidgetItem*>(item);
@@ -161,7 +166,7 @@ void GUI::displayTransformData(QTreeWidgetItem* item, int) {
 	z_loc->setText(QString(z_string.c_str()));
 }
 
-//test comment
+//#Slot for updating mouse-coordinates.
 void GUI::updateCoords(vtkObject* obj)
 {
 	// get interactor
@@ -179,40 +184,7 @@ void GUI::updateCoords(vtkObject* obj)
 	coord->setText(str);
 }
 
-void GUI::popup(vtkObject * obj, unsigned long,
-	void * client_data, void *,
-	vtkCommand * command)
-{
-	// A note about context menus in Qt and the QVTKWidget
-	// You may find it easy to just do context menus on right button up,
-	// due to the event proxy mechanism in place.
-
-	// That usually works, except in some cases.
-	// One case is where you capture context menu events that
-	// child windows don't process.  You could end up with a second
-	// context menu after the first one.
-
-	// See QVTKWidget::ContextMenuEvent enum which was added after the
-	// writing of this example.
-
-	// get interactor
-	vtkRenderWindowInteractor* iren = vtkRenderWindowInteractor::SafeDownCast(obj);
-	// consume event so the interactor style doesn't get it
-	command->AbortFlagOn();
-	// get popup menu
-	QMenu* popupMenu = static_cast<QMenu*>(client_data);
-	// get event location
-	int* sz = iren->GetSize();
-	int* position = iren->GetEventPosition();
-	// remember to flip y
-	QPoint pt = QPoint(position[0], sz[1] - position[1]);
-	// map to global
-	QPoint global_pt = popupMenu->parentWidget()->mapToGlobal(pt);
-	// show popup menu at global point
-	popupMenu->popup(global_pt);
-
-}
-
+//#Slot for opening 3D-files.
 void GUI::openFile() {
 
 	QString q_filename = QFileDialog::getOpenFileName(this, tr("Open file"), "C:/", tr("3D Files(*.ply *.stl *.pcd)"));
@@ -244,7 +216,7 @@ void GUI::openFile() {
 
 	char* file = new char[50];
 	char* ext = new char[10];
-	_splitpath(filename.c_str(), NULL, NULL, file, ext);
+	_splitpath_s(filename.c_str(), NULL, 0, NULL, 0, file, 30, ext, 30);
 	std::string s_file = file;
 	std::string s_ext = ext;
 
@@ -260,13 +232,18 @@ void GUI::openFile() {
 	VTKViewer->update();
 }
 
+//#Slot for spawning geometrical primitives.
 void GUI::spawnPrimitive(QAction* primitive) {					// TODO: maybe even outsource the vtkPolyData (which we create in every if-case equally)?
 
+	//the vtkPolyDataMapper that we fill with 
 	polymapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 	std::string item_name;
 
+	//check what primitive we want to create
 	if (primitive->text() == "Plane") {
 
+		//create vtkPlaneSource, set a few parameter, update it and 
+		//then connect the vtkPolyDataMapper with it
 		vtkSmartPointer<vtkPlaneSource> planeSource =
 			vtkSmartPointer<vtkPlaneSource>::New();
 		planeSource->SetCenter(0.0, 0.0, 0.0);
@@ -275,14 +252,15 @@ void GUI::spawnPrimitive(QAction* primitive) {					// TODO: maybe even outsource
 
 		vtkPolyData* plane = planeSource->GetOutput();
 		polymapper->SetInputData(plane);
-		GUI::pri_planeCount++;
 
+		//we want to give it a default name und numbering
+		GUI::pri_planeCount++;
 		item_name = "Plane" + std::to_string(GUI::pri_planeCount);
-		//new_actor->setText(0, QString::fromStdString("Plane" + std::to_string(GUI::pri_planeCount)));
 
 	}
 	else if (primitive->text() == "Cube") {
 
+		//same procedure as above
 		vtkSmartPointer<vtkCubeSource> cubeSource =
 			vtkSmartPointer<vtkCubeSource>::New();
 		cubeSource->SetCenter(0.0, 0.0, 0.0);
@@ -290,18 +268,20 @@ void GUI::spawnPrimitive(QAction* primitive) {					// TODO: maybe even outsource
 
 		vtkPolyData* cube = cubeSource->GetOutput();
 		polymapper->SetInputData(cube);
-		GUI::pri_cubeCount++;
 
-		item_name = "Cube" + std::to_string(GUI::pri_planeCount);
-		//new_actor->setText(0, QString::fromStdString("Cube" + std::to_string(GUI::pri_cubeCount)));
+		GUI::pri_cubeCount++;
+		item_name = "Cube" + std::to_string(GUI::pri_cubeCount);
+	
 	}
 
+	//create a vtkActor, connect with the vtkPolyDataMapper and add to Ren1
 	vtkSmartPointer<vtkActor> actor =
 		vtkSmartPointer<vtkActor>::New();
 	
 	actor->SetMapper(polymapper);
 	Ren1->AddViewProp(actor);
 
+	//create a new item for our actors-list
 	Q_actorTreeWidgetItem* new_actor = new Q_actorTreeWidgetItem(treeWidget, actor, 1);
 	new_actor->setText(0, QString::fromStdString(item_name));
 
@@ -309,37 +289,42 @@ void GUI::spawnPrimitive(QAction* primitive) {					// TODO: maybe even outsource
 	
 }
 
+//#Slot for renaming an actor in the actor-list.
 void GUI::renameActor() {
+
 	actorlist_contextmenu_item->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled);
 	treeWidget->editItem(actorlist_contextmenu_item, 0);
 }
 
+//#Slot for deleting an actor out of the scene and the actor-list.
 void GUI::deleteActor() {
 	
+	//the subclass "actorlist_contextmenu_item" has an private reference on its actor, 
+	//so we can easily remove the actor when removing the item
 	Ren1->RemoveActor(actorlist_contextmenu_item->getActorReference());
 	delete actorlist_contextmenu_item;
 
 	VTKViewer->update();
 }
 
+//#Slot for context menu in the actors-list.
 void GUI::prepareMenu(const QPoint & pos)				
 {
-	vtkSmartPointer<vtkActorCollection> actors =
-		vtkSmartPointer<vtkActorCollection>::New();
-	actors = Ren1->GetActors();
-	actors->PrintSelf(cout, vtkIndent());
 
+	//we want to check if we clicked on an item, otherwise we DONT want a context menu!
 	if (treeWidget->itemAt(pos) != NULL) {
 
+		//get the item we clicked on
 		actorlist_contextmenu_item = dynamic_cast<Q_actorTreeWidgetItem*>(treeWidget->itemAt(pos));
 
-
+		//create two QActions and connect them to the corresponding slot-functions
 		QAction *renameAct = new QAction(QString("Rename"), this);
-		QAction *deleteAct = new QAction(QString("Communism works and I can prove it"), this);
+		QAction *deleteAct = new QAction(QString("Delete"), this);
 
 		connect(renameAct, SIGNAL(triggered()), this, SLOT(renameActor()));
 		connect(deleteAct, SIGNAL(triggered()), this, SLOT(deleteActor()));
 
+		//creating the QMenu that we want to show and add the QActions from above
 		QMenu menu(this);
 		menu.addAction(renameAct);
 		menu.addAction(deleteAct);

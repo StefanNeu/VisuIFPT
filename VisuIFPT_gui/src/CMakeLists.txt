@@ -14,11 +14,11 @@ include(${VTK_USE_FILE})
 
 set( Srcs main.cxx GUI.cxx Reader.cxx )
 
-set( Hdrs GUI.h Reader.h)
+set( Hdrs GUI.h Reader.h openPLY_dialog.h)
 
-set( MOC_Hdrs GUI.h )
+set( MOC_Hdrs GUI.h Reader.h openPLY_dialog.h)
 
-set( UIs GUI.ui )
+set( UIs GUI.ui openPLY_dialog.ui)
 
 # Use the include path and library for Qt that is used by VTK.
 include_directories(

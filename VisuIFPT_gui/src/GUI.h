@@ -48,9 +48,6 @@ public:
 public slots:
 	
 	void updateCoords(vtkObject*);
-	void popup(vtkObject * obj, unsigned long,
-		void * client_data, void *,
-		vtkCommand * command);
 	void openFile();
 	void spawnPrimitive(QAction*);
 	void prepareMenu(const QPoint&);
