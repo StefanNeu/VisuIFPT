@@ -12,7 +12,7 @@ project(VisuIFPT_gui)
 find_package(VTK REQUIRED NO_MODULE)
 include(${VTK_USE_FILE})
 
-set( Srcs main.cxx GUI.cxx Reader.cxx )
+set( Srcs main.cxx GUI.cxx Reader.cxx openPLY_dialog.cxx)
 
 set( Hdrs GUI.h Reader.h openPLY_dialog.h)
 

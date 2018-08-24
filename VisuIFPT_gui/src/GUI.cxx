@@ -1,4 +1,5 @@
 #include "GUI.h"
+#include "openPLY_dialog.h"
 
 #include <QMenu>
 
@@ -113,6 +114,7 @@ GUI::GUI()
 	//updating the transform-data in the inspector, when item in actors-list is clicked
 	connect(treeWidget, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this, SLOT(displayTransformData(QTreeWidgetItem*, int)));
 
+	
 
 	//TODO: maybe put the connection above in this object?
 	Connections = vtkEventQtSlotConnect::New();
@@ -194,15 +196,8 @@ void GUI::openFile() {
 	
 	if (filename.find(".ply") != std::string::npos) {						//we test if we find the file-extension ".ply" or ".stl"
 		
-		/*std::cout << "Do you want to read this file as standard .ply or as pointcloud?" << std::endl;
-		std::cout << "Type \"s\" for standard mode and \"p\" for pointcloud mode: ";
-		
-		if (mode == 's') {								//standard mode-> open PLY with internal reader
-			readPLY_s(data_mapper, filename);
-		}
-		else if (mode == 'p') {							//pointcloud mode-> open PLY with our reader
-			readPLY_p(data_mapper, filename);
-		}*/
+		//openPLY_dialog* dialog = new openPLY_dialog();
+		//dialog->exec();
 
 		readPLY_p(polymapper, filename);
 
@@ -214,6 +209,7 @@ void GUI::openFile() {
 		readPCD(polymapper, filename);
 	}
 
+	
 	char* file = new char[50];
 	char* ext = new char[10];
 	_splitpath_s(filename.c_str(), NULL, 0, NULL, 0, file, 30, ext, 30);

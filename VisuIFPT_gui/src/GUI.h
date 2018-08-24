@@ -62,6 +62,7 @@ protected:
 	//objects that contains almost all connections between buttons and other objects
 	vtkEventQtSlotConnect* Connections;
 
+
 private:
 	//polydatamapper for our files or geo. primitives
 	vtkSmartPointer<vtkPolyDataMapper> polymapper;
