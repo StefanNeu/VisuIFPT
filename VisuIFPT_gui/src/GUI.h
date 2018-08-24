@@ -16,13 +16,16 @@ class vtkEventQtSlotConnect;
 class vtkObject;
 class vtkCommand;
 
-//we need this derived class to access protected members "JoystickOrCamera" and "CameraOrActor" of base class
+//Derived class to access protected members "JoystickOrCamera" and "CameraOrActor" of base class
 class vtk_InteractorMode : public vtkInteractorStyleSwitch {
 public:
 	vtk_InteractorMode* New();
+
+	//Return mode of vtkInteractor
 	void getMode(std::string&, std::string&);
 };
 
+//Derived class of QTreeWidgetItem, with private reference to the actor of the item
 class Q_actorTreeWidgetItem : public QTreeWidgetItem {
 public:
 
@@ -30,6 +33,7 @@ public:
 		refToActor = referenced_actor;
 	}
 
+	//Return the vtkActor of this item
 	vtkActor* getActorReference() {
 		return refToActor;
 	}
@@ -47,15 +51,29 @@ public:
 
 public slots:
 	
+	//Update coordinates of mouse
 	void updateCoords(vtkObject*);
+
+	//Open 3D-files
 	void openFile();
+
+	//Spawn geometrical primitives
 	void spawnPrimitive(QAction*);
+
+	//Spawn context-menu when you rightclick in the actors-list
 	void prepareMenu(const QPoint&);
+
+	//Rename an item in the actors-list
 	void renameActor();
+
+	//Delete item from actors-list and the corresponding actor from the renderer
 	void deleteActor();
+
+	//Display the transform-data of the referenced vtkActor of this item
 	void displayTransformData(QTreeWidgetItem*, int);
 
 protected:
+
 	//currently our only renderer of the scene
 	vtkRenderer * Ren1;
 

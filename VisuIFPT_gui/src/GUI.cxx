@@ -148,8 +148,7 @@ void GUI::displayTransformData(QTreeWidgetItem* item, int) {
 	actor->SetUserTransform(transform1);
 	*/
 
-	actor->AddPosition(10.0, 10.0, 0.0);				//just for testing! we dont want to move actor evertytime we click on an item in the actor list
-
+	//get position of actor and store it in the corresponding QLineEdit of the inspector
 	double* position = new double[3];
 	position = actor->GetPosition();
 	
@@ -189,12 +188,14 @@ void GUI::updateCoords(vtkObject* obj)
 //#Slot for opening 3D-files.
 void GUI::openFile() {
 
+	//open QFileDialog to open file in the windows-explorer
 	QString q_filename = QFileDialog::getOpenFileName(this, tr("Open file"), "C:/", tr("3D Files(*.ply *.stl *.pcd)"));
 	std::string filename = q_filename.toStdString();
 
 	polymapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 	
-	if (filename.find(".ply") != std::string::npos) {						//we test if we find the file-extension ".ply" or ".stl"
+	//we test if we find the file-extension ply/stl or pcd
+	if (filename.find(".ply") != std::string::npos) {	
 		
 		//openPLY_dialog* dialog = new openPLY_dialog();
 		//dialog->exec();
@@ -209,13 +210,14 @@ void GUI::openFile() {
 		readPCD(polymapper, filename);
 	}
 
-	
+	//create c_string and use _splitpath_s() to fill them with the filename-data
 	char* file = new char[50];
 	char* ext = new char[10];
 	_splitpath_s(filename.c_str(), NULL, 0, NULL, 0, file, 30, ext, 30);
 	std::string s_file = file;
 	std::string s_ext = ext;
 
+	//create actor, connect to polymapper and add to renderer
 	vtkSmartPointer<vtkActor> actor =
 		vtkSmartPointer<vtkActor>::New();
 	actor->SetMapper(polymapper);
@@ -223,7 +225,7 @@ void GUI::openFile() {
 
 	Q_actorTreeWidgetItem* new_actor = new Q_actorTreeWidgetItem(treeWidget, actor, 1);
 
-	new_actor->setText(0, QString::fromStdString(s_file + s_ext));
+	new_actor->setText(0, QString::fromStdString(s_file + s_ext)); //TODO: numbering when you open same file more than one time
 
 	VTKViewer->update();
 }
