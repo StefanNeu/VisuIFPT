@@ -16,6 +16,14 @@ class vtkEventQtSlotConnect;
 class vtkObject;
 class vtkCommand;
 
+class vtkTimerCallback : public vtkCommand {
+public:
+	static vtkTimerCallback* New();
+	virtual void Execute(vtkObject *caller, unsigned long eventId,
+		void * vtkNotUsed(callData));
+};
+
+
 //Derived class to access protected members "JoystickOrCamera" and "CameraOrActor" of base class
 class vtk_InteractorMode : public vtkInteractorStyleSwitch {
 public:
@@ -69,6 +77,10 @@ public slots:
 	//Delete item from actors-list and the corresponding actor from the renderer
 	void deleteActor();
 
+	void deactivateActor();
+
+	void reactivateActor();
+
 	//Display the transform-data of the referenced vtkActor of this item
 	void displayTransformData(QTreeWidgetItem*, int);
 
@@ -88,6 +100,7 @@ private:
 	//static counters for geometric primitives
 	static int pri_cubeCount;
 	static int pri_planeCount;
+	static int pri_sphereCount;
 
 	//the interaction style of our window
 	vtk_InteractorMode* style;

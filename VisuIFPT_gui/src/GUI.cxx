@@ -19,6 +19,7 @@
 #include <vtkOrientationMarkerWidget.h>
 #include <vtkPlaneSource.h>
 #include <vtkCubeSource.h>
+#include <vtkSphereSource.h>
 #include <vtkShrinkFilter.h>
 #include <vtkNamedColors.h>
 #include <vtkDataSetMapper.h>
@@ -26,6 +27,7 @@
 #include <vtkInteractorStyleSwitch.h>
 #include <qtreewidget.h>
 #include <vtkTransform.h>
+#include <vtkCommand.h>
 #include <sstream>
 #include <iomanip> 
 
@@ -36,9 +38,23 @@
 //initialize static counters for geometric primitives (just for naming purposes)
 int GUI::pri_planeCount = 0;
 int GUI::pri_cubeCount = 0;
+int GUI::pri_sphereCount = 0;
 
 
 //---------------------------- SOME DERIVED CLASSES WE NEED-----------------------------------------------
+
+
+vtkTimerCallback* vtkTimerCallback::New() {
+	return new vtkTimerCallback();
+}
+
+void vtkTimerCallback::Execute(vtkObject *caller, unsigned long eventId,
+	void * vtkNotUsed(callData)) {
+	
+	vtkRenderWindowInteractor *iren = vtkRenderWindowInteractor::SafeDownCast(caller);
+	iren->GetRenderWindow()->Render();
+
+}
 
 //Simple constructor for derived class we need
 vtk_InteractorMode* vtk_InteractorMode::New() {		
@@ -88,7 +104,19 @@ GUI::GUI()
 	style = style->New();
 	style->SetCurrentStyleToTrackballCamera();
 	VTKViewer->GetRenderWindow()->GetInteractor()->SetInteractorStyle(style);
+
+
+	//initialize interactor and add callback-object to update the viewer periodically
+	VTKViewer->GetRenderWindow()->GetInteractor()->Initialize();
+
+	vtkSmartPointer<vtkTimerCallback> cb =
+		vtkSmartPointer<vtkTimerCallback>::New();
+	VTKViewer->GetRenderWindow()->GetInteractor()->AddObserver(vtkCommand::TimerEvent, cb);
+
+	VTKViewer->GetRenderWindow()->GetInteractor()->CreateRepeatingTimer(100);
 	
+
+
 	//creating a OrientationMarkerWidget
 	vtkAxesActor* axes = vtkAxesActor::New();
 	vtkOrientationMarkerWidget* widget = vtkOrientationMarkerWidget::New();
@@ -100,6 +128,7 @@ GUI::GUI()
 	widget->InteractiveOn();
 
 	
+
 	//--------------------------- CONNECTIONS -----------------------------------------
 
 	//connection from (button) QAction* Open_File to the SLOT with function openFile(), when triggered
@@ -142,11 +171,6 @@ void GUI::displayTransformData(QTreeWidgetItem* item, int) {
 		vtkSmartPointer<vtkActor>::New();
 	actor = actor_item->getActorReference();
 
-	/*vtkSmartPointer<vtkTransform> transform1 =
-		vtkSmartPointer<vtkTransform>::New();
-	transform1->Translate(10.0, 0.0, 0.0);
-	actor->SetUserTransform(transform1);
-	*/
 
 	//get position of actor and store it in the corresponding QLineEdit of the inspector
 	double* position = new double[3];
@@ -271,6 +295,19 @@ void GUI::spawnPrimitive(QAction* primitive) {					// TODO: maybe even outsource
 		item_name = "Cube" + std::to_string(GUI::pri_cubeCount);
 	
 	}
+	else if (primitive->text() == "Sphere") {
+
+		vtkSmartPointer<vtkSphereSource> sphereSource =
+			vtkSmartPointer<vtkSphereSource>::New();
+		sphereSource->SetCenter(0.0, 0.0, 0.0);
+		sphereSource->Update();
+
+		vtkPolyData* sphere = sphereSource->GetOutput();
+		polymapper->SetInputData(sphere);
+
+		GUI::pri_sphereCount++;
+		item_name = "Sphere" + std::to_string(GUI::pri_sphereCount);
+	}
 
 	//create a vtkActor, connect with the vtkPolyDataMapper and add to Ren1
 	vtkSmartPointer<vtkActor> actor =
@@ -305,6 +342,18 @@ void GUI::deleteActor() {
 	VTKViewer->update();
 }
 
+void GUI::deactivateActor() {
+
+	actorlist_contextmenu_item->getActorReference()->VisibilityOff();
+	VTKViewer->update();
+}
+
+void GUI::reactivateActor() {
+
+	actorlist_contextmenu_item->getActorReference()->VisibilityOn();
+	VTKViewer->update();
+}
+
 //#Slot for context menu in the actors-list.
 void GUI::prepareMenu(const QPoint & pos)				
 {
@@ -318,14 +367,23 @@ void GUI::prepareMenu(const QPoint & pos)
 		//create two QActions and connect them to the corresponding slot-functions
 		QAction *renameAct = new QAction(QString("Rename"), this);
 		QAction *deleteAct = new QAction(QString("Delete"), this);
+		QAction *deactivateAct = new QAction(QString("Deactivate actor"), this);
+		QAction *reactivateAct = new QAction(QString("Activate actor"), this);
 
 		connect(renameAct, SIGNAL(triggered()), this, SLOT(renameActor()));
 		connect(deleteAct, SIGNAL(triggered()), this, SLOT(deleteActor()));
+		connect(deactivateAct, SIGNAL(triggered()), this, SLOT(deactivateActor()));
+		connect(reactivateAct, SIGNAL(triggered()), this, SLOT(reactivateActor()));
 
 		//creating the QMenu that we want to show and add the QActions from above
 		QMenu menu(this);
 		menu.addAction(renameAct);
 		menu.addAction(deleteAct);
+
+		menu.addSeparator();
+
+		menu.addAction(deactivateAct);
+		menu.addAction(reactivateAct);
 
 		menu.exec(treeWidget->mapToGlobal(pos));
 	}
