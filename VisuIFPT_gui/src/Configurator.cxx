@@ -1,16 +1,15 @@
-#include "GUI.h"
-#include "openPLY_dialog.h"
-#include "HelpClasses.h"
-#include <QMenu>
 #include "Configurator.h"
+
+#include <QMenu>
+#include <QVTKInteractor.h>
 
 #include "vtkActor.h"
 #include "vtkCommand.h"
-#include "vtkConeSource.h"
+
 #include "vtkEventQtSlotConnect.h"
 #include "vtkPolyDataMapper.h"
-#include <vtkGenericOpenGLRenderWindow.h>
-#include "vtkRenderer.h"
+#include <vtkRenderWindow.h>
+#include <vtkRenderer.h>
 
 #include <istream>
 #include <qfiledialog.h>
@@ -31,27 +30,12 @@
 #include <vtkCommand.h>
 #include <sstream>
 #include <iomanip> 
-
-
-#include "QVTKInteractor.h"
-
-
-//initialize static counters for geometric primitives (just for naming purposes)
-int GUI::pri_planeCount = 0;
-int GUI::pri_cubeCount = 0;
-int GUI::pri_sphereCount = 0;
-
-
-//---------------------------- SOME DERIVED CLASSES WE NEED-----------------------------------------------
-
-
+#include "HelpClasses.h"
+#include <qtreewidget.h>
 
 //#Constructor of our main window.
-GUI::GUI()
+Configurator::Configurator()
 {
-
-	vtkObject::GlobalWarningDisplayOff();
-
 	//sets up all qt objects (see ui_GUI.h)
 	this->setupUi(this);
 
@@ -59,27 +43,27 @@ GUI::GUI()
 	// create a window to make it stereo capable and give it to QVTKWidget
 	vtkRenderWindow* renwin = vtkRenderWindow::New();				//very bad anti-aliasing with opengl instead of "default" render window!
 
-	VTKViewer->SetRenderWindow(renwin);
+	Actor_Viewer->SetRenderWindow(renwin);
 	renwin->Delete();
 
 	//add a renderer
-	Ren1 = vtkRenderer::New();
-	VTKViewer->GetRenderWindow()->AddRenderer(Ren1);
+	vtkSmartPointer<vtkRenderer> Actor_Renderer = vtkRenderer::New();
+	Actor_Viewer->GetRenderWindow()->AddRenderer(Actor_Renderer);
 
 	//add an InteractionMode (derivitive from InteractionStyleSwitch) and set default to trackball_camera
 	style = style->New();
 	style->SetCurrentStyleToTrackballCamera();
-	VTKViewer->GetRenderWindow()->GetInteractor()->SetInteractorStyle(style);
+	Actor_Viewer->GetRenderWindow()->GetInteractor()->SetInteractorStyle(style);
 
 
 	//initialize interactor and add callback-object to update the viewer periodically
-	VTKViewer->GetRenderWindow()->GetInteractor()->Initialize();
+	Actor_Viewer->GetRenderWindow()->GetInteractor()->Initialize();
 
 	vtkSmartPointer<vtkTimerCallback> cb =
 		vtkSmartPointer<vtkTimerCallback>::New();
-	VTKViewer->GetRenderWindow()->GetInteractor()->AddObserver(vtkCommand::TimerEvent, cb);
+	Actor_Viewer->GetRenderWindow()->GetInteractor()->AddObserver(vtkCommand::TimerEvent, cb);
 
-	VTKViewer->GetRenderWindow()->GetInteractor()->CreateRepeatingTimer(100);
+	Actor_Viewer->GetRenderWindow()->GetInteractor()->CreateRepeatingTimer(100);
 	
 
 
@@ -88,50 +72,25 @@ GUI::GUI()
 	vtkOrientationMarkerWidget* widget = vtkOrientationMarkerWidget::New();
 	widget->SetOutlineColor(0.9300, 0.5700, 0.1300);
 	widget->SetOrientationMarker(axes);
-	widget->SetInteractor(VTKViewer->GetRenderWindow()->GetInteractor());
+	widget->SetInteractor(Actor_Viewer->GetRenderWindow()->GetInteractor());
 	widget->SetViewport(0.0, 0.0, 0.12, 0.12);
 	widget->SetEnabled(1);
 	widget->InteractiveOn();
 
 	
 
-	//--------------------------- CONNECTIONS -----------------------------------------
 
-	//connection from (button) QAction* Open_File to the SLOT with function openFile(), when triggered
-	connect(actionOpen_File, SIGNAL(triggered()), this, SLOT(openFile()));
-
-	//same connection as above, but we process the press on the menu and the following press on the QAction* in the SLOT-function
-	connect(menuGeometric_Primitives, SIGNAL(triggered(QAction*)), this, SLOT(spawnPrimitive(QAction*)));
-
-	//connection for context menu in our actors-list
-	connect(treeWidget, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(prepareMenu(const QPoint&)));
-
-	//updating the transform-data in the inspector, when item in actors-list is clicked
-	connect(treeWidget, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this, SLOT(displayTransformData(QTreeWidgetItem*, int)));
-
-	connect(actionOpen, SIGNAL(triggered()), this, SLOT(openConfigurator()));
-	
-
-	//this class is needed to manage Qt and VTK connections
-	Connections = vtkEventQtSlotConnect::New();
-
-	// update coords as we move through the window
-	Connections->Connect(VTKViewer->GetRenderWindow()->GetInteractor(),
-		vtkCommand::MouseMoveEvent,
-		this,
-		SLOT(updateCoords(vtkObject*)));
-
-	Connections->PrintSelf(cout, vtkIndent());
 }
 
-GUI::~GUI()
+Configurator::~Configurator()
 {
-	Ren1->Delete();
-	Connections->Delete();
+	Actor_Renderer->Delete();
+
 }
 
+// TODO: muss wirklich der header QTreeWidget.h benutzt werden, damit QTreewidgetitem bekannt wird?
 //#Slot for transform-data.
-void GUI::displayTransformData(QTreeWidgetItem* item, int) {
+void Configurator::displayTransformData(QTreeWidgetItem* item, int) {
 
 	Q_actorTreeWidgetItem* actor_item = dynamic_cast<Q_actorTreeWidgetItem*>(item);
 	vtkSmartPointer<vtkActor> actor =
@@ -158,8 +117,9 @@ void GUI::displayTransformData(QTreeWidgetItem* item, int) {
 	z_loc->setText(QString(z_string.c_str()));
 }
 
+// TODO: Kameramodus updaten
 //#Slot for updating mouse-coordinates.
-void GUI::updateCoords(vtkObject* obj)
+/*void Configurator::updateCoords(vtkObject* obj)
 {
 	// get interactor
 	vtkRenderWindowInteractor* iren = vtkRenderWindowInteractor::SafeDownCast(obj);
@@ -175,7 +135,10 @@ void GUI::updateCoords(vtkObject* obj)
 	str.sprintf("Mode:  %s     %s                      x=%d : y=%d", ac_or_cam.c_str(), joy_or_tra.c_str(), event_pos[0], event_pos[1]);
 	coord->setText(str);
 }
+*/
 
+// TODO: Option einbauen, um Primitive oder Files als "Bausteine" für einen Actor einzufügen
+/*
 //#Slot for opening 3D-files.
 void GUI::openFile() {
 
@@ -290,75 +253,5 @@ void GUI::spawnPrimitive(QAction* primitive) {					// TODO: maybe even outsource
 	VTKViewer->update();
 	
 }
+*/
 
-//#Slot for renaming an actor in the actor-list.
-void GUI::renameActor() {
-
-	actorlist_contextmenu_item->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled);
-	treeWidget->editItem(actorlist_contextmenu_item, 0);
-}
-
-//#Slot for deleting an actor out of the scene and the actor-list.
-void GUI::deleteActor() {
-	
-	//the subclass "actorlist_contextmenu_item" has an private reference on its actor, 
-	//so we can easily remove the actor when removing the item
-	Ren1->RemoveActor(actorlist_contextmenu_item->getActorReference());
-	delete actorlist_contextmenu_item;
-
-	VTKViewer->update();
-}
-
-void GUI::deactivateActor() {
-
-	actorlist_contextmenu_item->getActorReference()->VisibilityOff();
-	VTKViewer->update();
-}
-
-void GUI::reactivateActor() {
-
-	actorlist_contextmenu_item->getActorReference()->VisibilityOn();
-	VTKViewer->update();
-}
-
-//#Slot for context menu in the actors-list.
-void GUI::prepareMenu(const QPoint & pos)				
-{
-
-	//we want to check if we clicked on an item, otherwise we DONT want a context menu!
-	if (treeWidget->itemAt(pos) != NULL) {
-
-		//get the item we clicked on
-		actorlist_contextmenu_item = dynamic_cast<Q_actorTreeWidgetItem*>(treeWidget->itemAt(pos));
-
-		//create two QActions and connect them to the corresponding slot-functions
-		QAction *renameAct = new QAction(QString("Rename"), this);
-		QAction *deleteAct = new QAction(QString("Delete"), this);
-		QAction *deactivateAct = new QAction(QString("Deactivate actor"), this);
-		QAction *reactivateAct = new QAction(QString("Activate actor"), this);
-
-		connect(renameAct, SIGNAL(triggered()), this, SLOT(renameActor()));
-		connect(deleteAct, SIGNAL(triggered()), this, SLOT(deleteActor()));
-		connect(deactivateAct, SIGNAL(triggered()), this, SLOT(deactivateActor()));
-		connect(reactivateAct, SIGNAL(triggered()), this, SLOT(reactivateActor()));
-
-		//creating the QMenu that we want to show and add the QActions from above
-		QMenu menu(this);
-		menu.addAction(renameAct);
-		menu.addAction(deleteAct);
-
-		menu.addSeparator();
-
-		menu.addAction(deactivateAct);
-		menu.addAction(reactivateAct);
-
-		menu.exec(treeWidget->mapToGlobal(pos));
-	}
-}
-
-void GUI::openConfigurator() {
-
-	//TODO: gucken das kein Speicherleck entsteht
-	Configurator* actor_config = new Configurator();
-	actor_config->show();
-}

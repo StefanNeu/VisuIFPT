@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1075</width>
-    <height>600</height>
+    <width>1063</width>
+    <height>598</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Configurator</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QVTKOpenGLWidget" name="VTKViewer" native="true">
+   <widget class="QVTKWidget" name="Actor_Viewer" native="true">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -211,7 +211,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1075</width>
+     <width>1063</width>
      <height>21</height>
     </rect>
    </property>

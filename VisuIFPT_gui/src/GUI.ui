@@ -57,7 +57,7 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QVTKOpenGLWidget" name="VTKViewer" native="true">
+       <widget class="QVTKWidget" name="VTKViewer" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
           <horstretch>0</horstretch>
@@ -374,7 +374,7 @@
    </widget>
    <widget class="QMenu" name="menuAdd">
     <property name="title">
-     <string>Add</string>
+     <string>Fast-Add</string>
     </property>
     <widget class="QMenu" name="menuGeometric_Primitives">
      <property name="title">
@@ -386,8 +386,15 @@
     </widget>
     <addaction name="menuGeometric_Primitives"/>
    </widget>
+   <widget class="QMenu" name="menuConfigurator">
+    <property name="title">
+     <string>Configurator</string>
+    </property>
+    <addaction name="actionOpen"/>
+   </widget>
    <addaction name="menu_File"/>
    <addaction name="menuAdd"/>
+   <addaction name="menuConfigurator"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionExit">
@@ -423,6 +430,11 @@
   <action name="actionSphere">
    <property name="text">
     <string>Sphere</string>
+   </property>
+  </action>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open Configurator</string>
    </property>
   </action>
  </widget>

@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 #include "ui_GUI.h"
+#include "HelpClasses.h"
+
 
 #include <istream>
 #include <vtkPolyDataMapper.h>
@@ -10,45 +12,12 @@
 #include <vtkOrientationMarkerWidget.h>
 #include <vtkInteractorStyleSwitch.h>
 
-
+// TODO: necessary declarations?
 class vtkRenderer;
 class vtkEventQtSlotConnect;
 class vtkObject;
 class vtkCommand;
 
-class vtkTimerCallback : public vtkCommand {
-public:
-	static vtkTimerCallback* New();
-	virtual void Execute(vtkObject *caller, unsigned long eventId,
-		void * vtkNotUsed(callData));
-};
-
-
-//Derived class to access protected members "JoystickOrCamera" and "CameraOrActor" of base class
-class vtk_InteractorMode : public vtkInteractorStyleSwitch {
-public:
-	vtk_InteractorMode* New();
-
-	//Return mode of vtkInteractor
-	void getMode(std::string&, std::string&);
-};
-
-//Derived class of QTreeWidgetItem, with private reference to the actor of the item
-class Q_actorTreeWidgetItem : public QTreeWidgetItem {
-public:
-
-	Q_actorTreeWidgetItem(QTreeWidget* view, vtkActor* referenced_actor, int type = 1) : QTreeWidgetItem(view, type){
-		refToActor = referenced_actor;
-	}
-
-	//Return the vtkActor of this item
-	vtkActor* getActorReference() {
-		return refToActor;
-	}
-
-private:
-	vtkActor * refToActor;
-};
 
 class GUI : public QMainWindow, public Ui::GUI
 {
@@ -84,6 +53,8 @@ public slots:
 	//Display the transform-data of the referenced vtkActor of this item
 	void displayTransformData(QTreeWidgetItem*, int);
 
+	void openConfigurator();
+
 protected:
 
 	//currently our only renderer of the scene
@@ -107,7 +78,7 @@ private:
 
 	//public treewidgetitem that we assign when we open a context menu on a item of the actorlist
 	Q_actorTreeWidgetItem* actorlist_contextmenu_item;
-	
+
 };
 
 #endif // _GUI_h

@@ -30,9 +30,8 @@ http://www.trolltech.com/products/3rdparty/vtksupport.html
 int main(int argc, char** argv)
 {
 	QVTKApplication app(argc, argv);
-	GUI widget;
+	GUI mainwindow;
 
-	widget.show();
-
+	mainwindow.show();
 	return app.exec();
 }
