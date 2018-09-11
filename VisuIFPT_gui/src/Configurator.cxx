@@ -32,10 +32,20 @@
 #include <iomanip> 
 #include "HelpClasses.h"
 #include <qtreewidget.h>
+#include <QCloseEvent>
+#include <QMessageBox>
+
+
+bool Configurator::open_instance = false;
 
 //#Constructor of our main window.
 Configurator::Configurator()
 {
+
+	
+	open_instance = true;
+	
+
 	//sets up all qt objects (see ui_GUI.h)
 	this->setupUi(this);
 
@@ -47,7 +57,7 @@ Configurator::Configurator()
 	renwin->Delete();
 
 	//add a renderer
-	vtkSmartPointer<vtkRenderer> Actor_Renderer = vtkRenderer::New();
+	Actor_Renderer = vtkRenderer::New();
 	Actor_Viewer->GetRenderWindow()->AddRenderer(Actor_Renderer);
 
 	//add an InteractionMode (derivitive from InteractionStyleSwitch) and set default to trackball_camera
@@ -77,7 +87,9 @@ Configurator::Configurator()
 	widget->SetEnabled(1);
 	widget->InteractiveOn();
 
-	
+	//---------------------- CONNECTIONS -------------------------------------
+
+	connect(menuGeometric_Primitives, SIGNAL(triggered(QAction*)), this, SLOT(spawnPrimitive(QAction*)));
 
 
 }
@@ -85,7 +97,7 @@ Configurator::Configurator()
 Configurator::~Configurator()
 {
 	Actor_Renderer->Delete();
-
+	
 }
 
 // TODO: muss wirklich der header QTreeWidget.h benutzt werden, damit QTreewidgetitem bekannt wird?
@@ -115,6 +127,96 @@ void Configurator::displayTransformData(QTreeWidgetItem* item, int) {
 	x_loc->setText(QString(x_string.c_str()));
 	y_loc->setText(QString(y_string.c_str()));
 	z_loc->setText(QString(z_string.c_str()));
+}
+
+
+// TODO: Actorliste einfügen?
+void Configurator::spawnPrimitive(QAction* primitive) {
+
+	//the vtkPolyDataMapper that we fill with 
+	vtkSmartPointer<vtkPolyDataMapper> polymapper = 
+		vtkSmartPointer<vtkPolyDataMapper>::New();
+	//std::string item_name;
+
+
+	//check what primitive we want to create
+	if (primitive->text() == "Plane") {
+
+		//create vtkPlaneSource, set a few parameter, update it and 
+		//then connect the vtkPolyDataMapper with it
+		vtkSmartPointer<vtkPlaneSource> planeSource =
+			vtkSmartPointer<vtkPlaneSource>::New();
+		planeSource->SetCenter(0.0, 0.0, 0.0);
+		planeSource->SetNormal(1.0, 0.0, 1.0);
+		planeSource->Update();
+
+		vtkPolyData* plane = planeSource->GetOutput();
+		polymapper->SetInputData(plane);
+
+		//we want to give it a default name und numbering
+		//GUI::pri_planeCount++;
+		//item_name = "Plane" + std::to_string(GUI::pri_planeCount);
+
+	}
+	else if (primitive->text() == "Cube") {
+
+		//same procedure as above
+		vtkSmartPointer<vtkCubeSource> cubeSource =
+			vtkSmartPointer<vtkCubeSource>::New();
+		cubeSource->SetCenter(0.0, 0.0, 0.0);
+		cubeSource->Update();
+
+		vtkPolyData* cube = cubeSource->GetOutput();
+		polymapper->SetInputData(cube);
+
+		//GUI::pri_cubeCount++;
+		//item_name = "Cube" + std::to_string(GUI::pri_cubeCount);
+
+	}
+	else if (primitive->text() == "Sphere") {
+
+		vtkSmartPointer<vtkSphereSource> sphereSource =
+			vtkSmartPointer<vtkSphereSource>::New();
+		sphereSource->SetCenter(0.0, 0.0, 0.0);
+		sphereSource->Update();
+
+		vtkPolyData* sphere = sphereSource->GetOutput();
+		polymapper->SetInputData(sphere);
+
+		//GUI::pri_sphereCount++;
+		//item_name = "Sphere" + std::to_string(GUI::pri_sphereCount);
+	}
+
+	//create a vtkActor, connect with the vtkPolyDataMapper and add to Ren1
+	vtkSmartPointer<vtkActor> actor =
+		vtkSmartPointer<vtkActor>::New();
+
+	actor->SetMapper(polymapper);
+	
+	Actor_Renderer->AddActor(actor);
+
+	//create a new item for our actors-list
+	//Q_actorTreeWidgetItem* new_actor = new Q_actorTreeWidgetItem(treeWidget, actor, 1);
+	//new_actor->setText(0, QString::fromStdString(item_name));
+
+	Actor_Viewer->update();
+
+}
+
+void Configurator::closeEvent(QCloseEvent *event)
+{
+	QMessageBox::StandardButton resBtn = QMessageBox::question(this, QString("Configurator"),
+		tr("Are you sure?\n"),
+		QMessageBox::No | QMessageBox::Yes,
+		QMessageBox::Yes);
+	if (resBtn != QMessageBox::Yes) {
+		event->ignore();
+		
+	}
+	else {
+		event->accept();
+		open_instance = false;
+	}
 }
 
 // TODO: Kameramodus updaten

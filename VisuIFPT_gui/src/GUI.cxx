@@ -359,6 +359,8 @@ void GUI::prepareMenu(const QPoint & pos)
 void GUI::openConfigurator() {
 
 	//TODO: gucken das kein Speicherleck entsteht
-	Configurator* actor_config = new Configurator();
-	actor_config->show();
+	if (Configurator::open_instance == false) {
+		Configurator* actor_config = new Configurator();
+		actor_config->show();
+	}
 }

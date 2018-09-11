@@ -219,16 +219,46 @@
     <property name="title">
      <string>Add</string>
     </property>
+    <widget class="QMenu" name="menuGeometric_Primitives">
+     <property name="title">
+      <string>Geometric Primitives</string>
+     </property>
+     <addaction name="actionPlane"/>
+     <addaction name="actionCube"/>
+     <addaction name="actionSphere"/>
+    </widget>
+    <addaction name="menuGeometric_Primitives"/>
+   </widget>
+   <widget class="QMenu" name="menuExport">
+    <property name="title">
+     <string>Export</string>
+    </property>
    </widget>
    <addaction name="menuAdd"/>
+   <addaction name="menuExport"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionPlane">
+   <property name="text">
+    <string>Plane</string>
+   </property>
+  </action>
+  <action name="actionCube">
+   <property name="text">
+    <string>Cube</string>
+   </property>
+  </action>
+  <action name="actionSphere">
+   <property name="text">
+    <string>Sphere</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QVTKOpenGLWidget</class>
+   <class>QVTKWidget</class>
    <extends>QWidget</extends>
-   <header>qvtkopenglwidget.h</header>
+   <header>qvtkwidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

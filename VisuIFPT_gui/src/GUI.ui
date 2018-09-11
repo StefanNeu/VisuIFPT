@@ -440,9 +440,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QVTKOpenGLWidget</class>
+   <class>QVTKWidget</class>
    <extends>QWidget</extends>
-   <header>qvtkopenglwidget.h</header>
+   <header>qvtkwidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

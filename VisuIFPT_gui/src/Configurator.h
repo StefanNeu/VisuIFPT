@@ -14,10 +14,15 @@ public:
 	Configurator();
 	~Configurator();
 
+	//makes sure we only have one open instance of the configurator (could also be solved with the singleton concept)
+	static bool open_instance;
+
 public slots:
 
 	//Display the transform-data of the referenced vtkActor of this item
 	void displayTransformData(QTreeWidgetItem*, int);
+	void spawnPrimitive(QAction*);
+	void closeEvent(QCloseEvent*);
 
 private:
 
@@ -27,4 +32,5 @@ private:
 	//Renderer of the scene
 	vtkRenderer* Actor_Renderer;
 };
+
 #endif // _Configurator_h
