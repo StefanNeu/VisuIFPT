@@ -26,6 +26,9 @@ public:
 	GUI();
 	~GUI();
 
+	//currently our only renderer of the scene
+	vtkRenderer * Ren1;
+
 public slots:
 	
 	//Update coordinates of mouse
@@ -55,10 +58,8 @@ public slots:
 
 	void openConfigurator();
 
-protected:
 
-	//currently our only renderer of the scene
-	vtkRenderer * Ren1;
+protected:
 
 	//objects that contains almost all connections between buttons and other objects
 	vtkEventQtSlotConnect* Connections;

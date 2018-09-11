@@ -5,6 +5,8 @@
 
 #include "HelpClasses.h"			//for vtk_InteractorMode
 #include <vtkRenderer.h>
+#include <vtkAssembly.h>
+#include <GUI.h>
 
 class Configurator : public QMainWindow, public Ui::Configurator {
 
@@ -17,12 +19,15 @@ public:
 	//makes sure we only have one open instance of the configurator (could also be solved with the singleton concept)
 	static bool open_instance;
 
+	GUI* mainwindow;
+
 public slots:
 
 	//Display the transform-data of the referenced vtkActor of this item
 	void displayTransformData(QTreeWidgetItem*, int);
 	void spawnPrimitive(QAction*);
 	void closeEvent(QCloseEvent*);
+	void exportActor();
 
 private:
 
@@ -31,6 +36,10 @@ private:
 
 	//Renderer of the scene
 	vtkRenderer* Actor_Renderer;
+
+	//the actor we are assembling in the configurator and that we want to add to the mainwindow
+	vtkAssembly* new_actor;
+
 };
 
 #endif // _Configurator_h

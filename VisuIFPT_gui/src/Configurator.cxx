@@ -34,6 +34,7 @@
 #include <qtreewidget.h>
 #include <QCloseEvent>
 #include <QMessageBox>
+#include <vtkAssembly.h>
 
 
 bool Configurator::open_instance = false;
@@ -49,6 +50,8 @@ Configurator::Configurator()
 	//sets up all qt objects (see ui_GUI.h)
 	this->setupUi(this);
 
+	new_actor = vtkAssembly::New();
+	
 
 	// create a window to make it stereo capable and give it to QVTKWidget
 	vtkRenderWindow* renwin = vtkRenderWindow::New();				//very bad anti-aliasing with opengl instead of "default" render window!
@@ -91,6 +94,7 @@ Configurator::Configurator()
 
 	connect(menuGeometric_Primitives, SIGNAL(triggered(QAction*)), this, SLOT(spawnPrimitive(QAction*)));
 
+	connect(actionExport_to_Main_Window, SIGNAL(triggered()), this, SLOT(exportActor()));
 
 }
 
@@ -128,7 +132,6 @@ void Configurator::displayTransformData(QTreeWidgetItem* item, int) {
 	y_loc->setText(QString(y_string.c_str()));
 	z_loc->setText(QString(z_string.c_str()));
 }
-
 
 // TODO: Actorliste einfügen?
 void Configurator::spawnPrimitive(QAction* primitive) {
@@ -194,6 +197,9 @@ void Configurator::spawnPrimitive(QAction* primitive) {
 	actor->SetMapper(polymapper);
 	
 	Actor_Renderer->AddActor(actor);
+	
+
+	new_actor->AddPart((vtkProp3D*)actor);
 
 	//create a new item for our actors-list
 	//Q_actorTreeWidgetItem* new_actor = new Q_actorTreeWidgetItem(treeWidget, actor, 1);
@@ -217,6 +223,24 @@ void Configurator::closeEvent(QCloseEvent *event)
 		event->accept();
 		open_instance = false;
 	}
+}
+
+void Configurator::exportActor() {
+	vtkSmartPointer<vtkActor> new_actorCopy =
+		vtkSmartPointer<vtkActor>::New();
+	
+	vtkSmartPointer<vtkPolyDataMapper> new_actorMapper =
+		vtkSmartPointer<vtkPolyDataMapper>::New();
+	
+	vtkSmartPointer<vtkPolyData> new_actorData =
+		vtkSmartPointer<vtkPolyData>::New();
+	
+	vtkSmartPointer<vtkPropCollection> actor_collection =
+		vtkSmartPointer<vtkPropCollection>::New();
+
+	new_actor->GetActors()
+
+	mainwindow->Ren1->AddActor(new_actor);
 }
 
 // TODO: Kameramodus updaten

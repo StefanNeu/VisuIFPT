@@ -233,6 +233,7 @@
     <property name="title">
      <string>Export</string>
     </property>
+    <addaction name="actionExport_to_Main_Window"/>
    </widget>
    <addaction name="menuAdd"/>
    <addaction name="menuExport"/>
@@ -251,6 +252,11 @@
   <action name="actionSphere">
    <property name="text">
     <string>Sphere</string>
+   </property>
+  </action>
+  <action name="actionExport_to_Main_Window">
+   <property name="text">
+    <string>Export to Main Window</string>
    </property>
   </action>
  </widget>

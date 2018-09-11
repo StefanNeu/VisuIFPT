@@ -362,5 +362,7 @@ void GUI::openConfigurator() {
 	if (Configurator::open_instance == false) {
 		Configurator* actor_config = new Configurator();
 		actor_config->show();
+		actor_config->mainwindow = this;
+	
 	}
 }
