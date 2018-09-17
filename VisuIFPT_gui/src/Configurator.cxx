@@ -209,6 +209,8 @@ void Configurator::spawnPrimitive(QAction* primitive) {
 
 }
 
+
+//Safety warning when trying to close this window
 void Configurator::closeEvent(QCloseEvent *event)
 {
 	QMessageBox::StandardButton resBtn = QMessageBox::question(this, QString("Configurator"),
@@ -225,22 +227,18 @@ void Configurator::closeEvent(QCloseEvent *event)
 	}
 }
 
+//Slot function that adds the new_actor from the configurator to the renderer
 void Configurator::exportActor() {
-	vtkSmartPointer<vtkActor> new_actorCopy =
-		vtkSmartPointer<vtkActor>::New();
-	
-	vtkSmartPointer<vtkPolyDataMapper> new_actorMapper =
-		vtkSmartPointer<vtkPolyDataMapper>::New();
-	
-	vtkSmartPointer<vtkPolyData> new_actorData =
-		vtkSmartPointer<vtkPolyData>::New();
-	
-	vtkSmartPointer<vtkPropCollection> actor_collection =
-		vtkSmartPointer<vtkPropCollection>::New();
-
-	new_actor->GetActors()
 
 	mainwindow->Ren1->AddActor(new_actor);
+
+	mainwindow->new_actorCount++;
+
+	Q_actorTreeWidgetItem* new_item = new Q_actorTreeWidgetItem(mainwindow->treeWidget, new_actor, 1);
+
+	new_item->setText(0, QString::fromStdString("ConfigItem" + std::to_string(mainwindow->new_actorCount)));
+
+	close();
 }
 
 // TODO: Kameramodus updaten

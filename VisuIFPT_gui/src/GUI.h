@@ -29,6 +29,12 @@ public:
 	//currently our only renderer of the scene
 	vtkRenderer * Ren1;
 
+	//static counters for geometric primitives
+	static int pri_cubeCount;
+	static int pri_planeCount;
+	static int pri_sphereCount;
+	static int new_actorCount;
+
 public slots:
 	
 	//Update coordinates of mouse
@@ -68,11 +74,6 @@ protected:
 private:
 	//polydatamapper for our files or geo. primitives
 	vtkSmartPointer<vtkPolyDataMapper> polymapper;
-
-	//static counters for geometric primitives
-	static int pri_cubeCount;
-	static int pri_planeCount;
-	static int pri_sphereCount;
 
 	//the interaction style of our window
 	vtk_InteractorMode* style;

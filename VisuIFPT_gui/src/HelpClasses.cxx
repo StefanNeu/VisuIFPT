@@ -66,11 +66,11 @@ vtkActor* convertAssemblyToActor(vtkAssembly* new_actorAssembly) {
 
 	// TODO: check if assembly is empty when exporting
 
-	for (int i = 0; i < actor_collection->GetNumberOfItems; i++) {
+	/*for (int i = 0; i < actor_collection->GetNumberOfItems; i++) {
 		itemIterator = (vtkActor*) actor_collection->GetNextProp();
 		
 	}
+	*/
 
-
-
+	return NULL;
 }

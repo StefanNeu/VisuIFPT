@@ -4,6 +4,7 @@
 #include <vtkInteractorStyleSwitch.h>
 #include <qtreewidget.h>
 #include <vtkCommand.h>
+#include <vtkAssembly.h>
 
 
 
@@ -13,6 +14,12 @@ public:
 
 	Q_actorTreeWidgetItem(QTreeWidget* view, vtkActor* referenced_actor, int type = 1) : QTreeWidgetItem(view, type) {
 		refToActor = referenced_actor;
+		refToAssembly = NULL;
+	}
+
+	Q_actorTreeWidgetItem(QTreeWidget* view, vtkAssembly* referenced_assembly, int type = 1) : QTreeWidgetItem(view, type) {
+		refToAssembly = referenced_assembly;
+		refToActor = NULL;
 	}
 
 	//Return the vtkActor of this item
@@ -20,8 +27,13 @@ public:
 		return refToActor;
 	}
 
+	vtkAssembly* getAssemblyReference() {
+		return refToAssembly;
+	}
+
 private:
-	vtkActor * refToActor;
+	vtkActor* refToActor;
+	vtkAssembly* refToAssembly;
 };
 
 

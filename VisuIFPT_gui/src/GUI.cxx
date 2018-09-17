@@ -31,6 +31,11 @@
 #include <vtkCommand.h>
 #include <sstream>
 #include <iomanip> 
+#include <vtkAssembly.h>
+
+#include <vtkLightKit.h>
+#include <vtkLight.h>
+#include <vtkLightCollection.h>
 
 
 #include "QVTKInteractor.h"
@@ -40,6 +45,7 @@
 int GUI::pri_planeCount = 0;
 int GUI::pri_cubeCount = 0;
 int GUI::pri_sphereCount = 0;
+int GUI::new_actorCount = 0;
 
 
 //---------------------------- SOME DERIVED CLASSES WE NEED-----------------------------------------------
@@ -66,6 +72,20 @@ GUI::GUI()
 	Ren1 = vtkRenderer::New();
 	VTKViewer->GetRenderWindow()->AddRenderer(Ren1);
 
+
+	// Example for making an explicit light source that DOESN'T move with the camera/observer (like in reality)
+	/* 
+	Ren1->SetAutomaticLightCreation(0);
+	
+	vtkSmartPointer<vtkLight> lightKit =
+		vtkSmartPointer<vtkLight>::New();
+	lightKit->SetPosition(0.0, 2.0, 0.0);
+	lightKit->SetLightTypeToSceneLight();
+	lightKit->SetFocalPoint(0.0, 0.0, 0.0);
+	lightKit->SetAmbientColor(0.0, 1.0, 0.0);
+	Ren1->AddLight(lightKit);
+	*/
+	
 	//add an InteractionMode (derivitive from InteractionStyleSwitch) and set default to trackball_camera
 	style = style->New();
 	style->SetCurrentStyleToTrackballCamera();
@@ -133,29 +153,66 @@ GUI::~GUI()
 //#Slot for transform-data.
 void GUI::displayTransformData(QTreeWidgetItem* item, int) {
 
+	double* position = new double[3];
+	double* rotation = new double[3];
+	double* scale = new double[3];
+
 	Q_actorTreeWidgetItem* actor_item = dynamic_cast<Q_actorTreeWidgetItem*>(item);
+	
 	vtkSmartPointer<vtkActor> actor =
 		vtkSmartPointer<vtkActor>::New();
-	actor = actor_item->getActorReference();
-
-
-	//get position of actor and store it in the corresponding QLineEdit of the inspector
-	double* position = new double[3];
-	position = actor->GetPosition();
 	
-	std::string x_string = std::to_string(position[0]);
-	x_string = x_string.substr(0, x_string.size() - 4);
+	vtkSmartPointer<vtkAssembly> assembled_actor =
+		vtkSmartPointer<vtkAssembly>::New();
 
-	std::string y_string = std::to_string(position[1]);
-	y_string = y_string.substr(0, y_string.size() - 4);
+	if (actor_item->getActorReference() == NULL) {
 
-	std::string z_string = std::to_string(position[2]);
-	z_string = z_string.substr(0, z_string.size() - 4);
+		assembled_actor = actor_item->getAssemblyReference();
+
+		position = assembled_actor->GetPosition();
+		rotation = assembled_actor->GetOrientation();
+	}
+	else if (actor_item->getAssemblyReference() == NULL)
+	{
+
+		actor = actor_item->getActorReference();
+
+		position = actor->GetPosition();
+		rotation = actor->GetOrientation();
+	}
+	
+
+	
+
+	//------------------------ POSITION ------------------------------
+	std::string x_stringPOS = std::to_string(position[0]);
+	x_stringPOS = x_stringPOS.substr(0, x_stringPOS.size() - 4);
+
+	std::string y_stringPOS = std::to_string(position[1]);
+	y_stringPOS = y_stringPOS.substr(0, y_stringPOS.size() - 4);
+
+	std::string z_stringPOS = std::to_string(position[2]);
+	z_stringPOS = z_stringPOS.substr(0, z_stringPOS.size() - 4);
 
 
-	x_loc->setText(QString(x_string.c_str()));
-	y_loc->setText(QString(y_string.c_str()));
-	z_loc->setText(QString(z_string.c_str()));
+	x_loc->setText(QString(x_stringPOS.c_str()));
+	y_loc->setText(QString(y_stringPOS.c_str()));
+	z_loc->setText(QString(z_stringPOS.c_str()));
+
+	//---------------------- ROTATION ----------------------------------
+	std::string x_stringROT = std::to_string(rotation[0]);
+	x_stringROT = x_stringROT.substr(0, x_stringROT.size() - 4);
+
+	std::string y_stringROT = std::to_string(rotation[1]);
+	y_stringROT = y_stringROT.substr(0, y_stringROT.size() - 4);
+
+	std::string z_stringROT = std::to_string(rotation[2]);
+	z_stringROT = z_stringROT.substr(0, z_stringROT.size() - 4);
+
+
+	x_rot->setText(QString(x_stringROT.c_str()));
+	y_rot->setText(QString(y_stringROT.c_str()));
+	z_rot->setText(QString(z_stringROT.c_str()));
 }
 
 //#Slot for updating mouse-coordinates.
