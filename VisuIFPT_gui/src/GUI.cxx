@@ -1,73 +1,49 @@
-#include "GUI.h"
-#include "openPLY_dialog.h"
-#include "HelpClasses.h"
-#include <QMenu>
-#include "Configurator.h"
+#include <GUI.h>	
 
-#include "vtkActor.h"
-#include "vtkCommand.h"
-#include "vtkConeSource.h"
-#include "vtkEventQtSlotConnect.h"
-#include "vtkPolyDataMapper.h"
-#include <vtkGenericOpenGLRenderWindow.h>
-#include "vtkRenderer.h"
+#include <HelpClasses.h>
+#include <Reader.h>				//for reading different types of files
+#include <Configurator.h>		//for creating a window of type Configurator
 
-#include <istream>
-#include <qfiledialog.h>
-#include "Reader.h"
-#include <vtkPLYReader.h>
+#include <vtkActor.h>			//VTK/Qt usage
+#include <vtkPolyDataMapper.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderer.h>
 #include <vtkAxesActor.h>
 #include <vtkOrientationMarkerWidget.h>
 #include <vtkPlaneSource.h>
 #include <vtkCubeSource.h>
 #include <vtkSphereSource.h>
-#include <vtkShrinkFilter.h>
-#include <vtkNamedColors.h>
-#include <vtkDataSetMapper.h>
-#include <vtkProperty.h>
-#include <vtkInteractorStyleSwitch.h>
-#include <qtreewidget.h>
-#include <vtkTransform.h>
 #include <vtkCommand.h>
-#include <sstream>
-#include <iomanip> 
 #include <vtkAssembly.h>
+#include <qfiledialog.h>
 
+//----------- TESTED HEADERS ----------
 #include <vtkLightKit.h>
 #include <vtkLight.h>
 #include <vtkLightCollection.h>
 
 
-#include "QVTKInteractor.h"
-
-
-//initialize static counters for geometric primitives (just for naming purposes)
+//Initialize static counters for items from the actors-list (just for naming purposes)
 int GUI::pri_planeCount = 0;
 int GUI::pri_cubeCount = 0;
 int GUI::pri_sphereCount = 0;
 int GUI::new_actorCount = 0;
 
 
-//---------------------------- SOME DERIVED CLASSES WE NEED-----------------------------------------------
-
-
-
 //#Constructor of our main window.
 GUI::GUI()
 {
-
+	//shutdown the VTK Debug window.
 	vtkObject::GlobalWarningDisplayOff();
 
-	//sets up all qt objects (see ui_GUI.h)
+	//sets up all Qt objects (see ui_GUI.h)
 	this->setupUi(this);
 
-
-	// create a window to make it stereo capable and give it to QVTKWidget
-	vtkRenderWindow* renwin = vtkRenderWindow::New();				//very bad anti-aliasing with opengl instead of "default" render window!
-
+	//create a vtkRenderWindow, that we want to assign to the QVTKViewer
+	vtkRenderWindow* renwin = vtkRenderWindow::New();			
 	VTKViewer->SetRenderWindow(renwin);
 	renwin->Delete();
-
+	
 	//add a renderer
 	Ren1 = vtkRenderer::New();
 	VTKViewer->GetRenderWindow()->AddRenderer(Ren1);
@@ -86,6 +62,7 @@ GUI::GUI()
 	Ren1->AddLight(lightKit);
 	*/
 	
+
 	//add an InteractionMode (derivitive from InteractionStyleSwitch) and set default to trackball_camera
 	style = style->New();
 	style->SetCurrentStyleToTrackballCamera();
@@ -95,12 +72,15 @@ GUI::GUI()
 	//initialize interactor and add callback-object to update the viewer periodically
 	VTKViewer->GetRenderWindow()->GetInteractor()->Initialize();
 
+
+	// Periodically updating the Interactor, but commented because of bugs
+	/*
 	vtkSmartPointer<vtkTimerCallback> cb =
 		vtkSmartPointer<vtkTimerCallback>::New();
 	VTKViewer->GetRenderWindow()->GetInteractor()->AddObserver(vtkCommand::TimerEvent, cb);
 
 	VTKViewer->GetRenderWindow()->GetInteractor()->CreateRepeatingTimer(100);
-	
+	*/
 
 
 	//creating a OrientationMarkerWidget
@@ -129,6 +109,7 @@ GUI::GUI()
 	//updating the transform-data in the inspector, when item in actors-list is clicked
 	connect(treeWidget, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this, SLOT(displayTransformData(QTreeWidgetItem*, int)));
 
+	//open the Configurator-window
 	connect(actionOpen, SIGNAL(triggered()), this, SLOT(openConfigurator()));
 	
 
@@ -141,50 +122,47 @@ GUI::GUI()
 		this,
 		SLOT(updateCoords(vtkObject*)));
 
-	Connections->PrintSelf(cout, vtkIndent());
 }
 
 GUI::~GUI()
 {
+	//make sure to delete everything to avoid leaks!
 	Ren1->Delete();
 	Connections->Delete();
+	polymapper->Delete();
+	style->Delete();
+
+	// TODO: test if we have data leaks.
+	delete actorlist_contextmenu_item;
 }
 
-//#Slot for transform-data.
+//Slot for transform-data.
 void GUI::displayTransformData(QTreeWidgetItem* item, int) {
 
 	double* position = new double[3];
 	double* rotation = new double[3];
 	double* scale = new double[3];
 
+	//we cast the QTreeWidgetItem into the derived class, so we can use a few extra functions
 	Q_actorTreeWidgetItem* actor_item = dynamic_cast<Q_actorTreeWidgetItem*>(item);
-	
-	vtkSmartPointer<vtkActor> actor =
-		vtkSmartPointer<vtkActor>::New();
-	
-	vtkSmartPointer<vtkAssembly> assembled_actor =
-		vtkSmartPointer<vtkAssembly>::New();
 
+	//we need to find out, if we clicked on an item with an actor or assembly-reference
+	//(assemblies come from the configurator)
 	if (actor_item->getActorReference() == NULL) {
 
-		assembled_actor = actor_item->getAssemblyReference();
+		position = actor_item->getAssemblyReference()->GetPosition();
+		rotation = actor_item->getAssemblyReference()->GetOrientation();
 
-		position = assembled_actor->GetPosition();
-		rotation = assembled_actor->GetOrientation();
 	}
-	else if (actor_item->getAssemblyReference() == NULL)
-	{
+	else if (actor_item->getAssemblyReference() == NULL) {
 
-		actor = actor_item->getActorReference();
-
-		position = actor->GetPosition();
-		rotation = actor->GetOrientation();
+		position = actor_item->getActorReference()->GetPosition();
+		rotation = actor_item->getActorReference()->GetOrientation();
 	}
-	
-
 	
 
 	//------------------------ POSITION ------------------------------
+	//we need to cut off a little bit, off the too long double string
 	std::string x_stringPOS = std::to_string(position[0]);
 	x_stringPOS = x_stringPOS.substr(0, x_stringPOS.size() - 4);
 
@@ -194,12 +172,14 @@ void GUI::displayTransformData(QTreeWidgetItem* item, int) {
 	std::string z_stringPOS = std::to_string(position[2]);
 	z_stringPOS = z_stringPOS.substr(0, z_stringPOS.size() - 4);
 
-
+	//and set the text of the QLineEdit-objects
 	x_loc->setText(QString(x_stringPOS.c_str()));
 	y_loc->setText(QString(y_stringPOS.c_str()));
 	z_loc->setText(QString(z_stringPOS.c_str()));
 
+
 	//---------------------- ROTATION ----------------------------------
+	//same procedure as above
 	std::string x_stringROT = std::to_string(rotation[0]);
 	x_stringROT = x_stringROT.substr(0, x_stringROT.size() - 4);
 
@@ -208,7 +188,6 @@ void GUI::displayTransformData(QTreeWidgetItem* item, int) {
 
 	std::string z_stringROT = std::to_string(rotation[2]);
 	z_stringROT = z_stringROT.substr(0, z_stringROT.size() - 4);
-
 
 	x_rot->setText(QString(x_stringROT.c_str()));
 	y_rot->setText(QString(y_stringROT.c_str()));

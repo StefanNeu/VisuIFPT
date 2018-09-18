@@ -24,14 +24,23 @@ http://www.trolltech.com/products/3rdparty/vtksupport.html
 
 #include "QVTKApplication.h"
 
-#include "GUI.h"
-#include "Reader.h"
+#include "GUI.h"				//for creating our main window
 
+//MAIN entry point for the program!
 int main(int argc, char** argv)
 {
+
+	//we need to create a qvtkapplication is the main instance of our Qt-program
+
+	//we can give it the argc and argv parameter, from the main function
 	QVTKApplication app(argc, argv);
+
+	//the mainwindow of type GUI (see GUI.h and GUI.cxx)
 	GUI mainwindow;
 
+	//the window isn't shown by default, we need to show it explicitly
 	mainwindow.show();
+
+	//and finally .exec() needs to be called to start the Qt-program
 	return app.exec();
 }
