@@ -197,22 +197,23 @@ void GUI::displayTransformData(QTreeWidgetItem* item, int) {
 //#Slot for updating mouse-coordinates.
 void GUI::updateCoords(vtkObject* obj)
 {
-	// get interactor
+	//get interactor
 	vtkRenderWindowInteractor* iren = vtkRenderWindowInteractor::SafeDownCast(obj);
-	// get event position
+	//get event position
 	int event_pos[2];
 	iren->GetEventPosition(event_pos);
 
 	std::string ac_or_cam, joy_or_tra;
+	//we want to get the mode of our WindowInteractor
 	style->getMode(ac_or_cam, joy_or_tra);
 
-	// update label
+	//update label
 	QString str;
 	str.sprintf("Mode:  %s     %s                      x=%d : y=%d", ac_or_cam.c_str(), joy_or_tra.c_str(), event_pos[0], event_pos[1]);
 	coord->setText(str);
 }
 
-//#Slot for opening 3D-files.
+//Slot for opening 3D-files.
 void GUI::openFile() {
 
 	//open QFileDialog to open file in the windows-explorer
@@ -227,6 +228,7 @@ void GUI::openFile() {
 		//openPLY_dialog* dialog = new openPLY_dialog();
 		//dialog->exec();
 
+		//open file and read content into the polymapper
 		readPLY_p(polymapper, filename);
 
 	}
@@ -250,6 +252,7 @@ void GUI::openFile() {
 	actor->SetMapper(polymapper);
 	Ren1->AddViewProp(actor);
 
+	//new TreeWidgetItem for the actors_list
 	Q_actorTreeWidgetItem* new_actor = new Q_actorTreeWidgetItem(treeWidget, actor, 1);
 
 	new_actor->setText(0, QString::fromStdString(s_file + s_ext)); //TODO: numbering when you open same file more than one time
@@ -257,7 +260,7 @@ void GUI::openFile() {
 	VTKViewer->update();
 }
 
-//#Slot for spawning geometrical primitives.
+//Slot for spawning geometrical primitives.
 void GUI::spawnPrimitive(QAction* primitive) {					// TODO: maybe even outsource the vtkPolyData (which we create in every if-case equally)?
 
 	//the vtkPolyDataMapper that we fill with 
@@ -327,17 +330,19 @@ void GUI::spawnPrimitive(QAction* primitive) {					// TODO: maybe even outsource
 	
 }
 
-//#Slot for renaming an actor in the actor-list.
+//Slot for renaming an actor in the actor-list.
 void GUI::renameActor() {
 
+	//we need to make the item editable (setFlags) to edit it in the next step
 	actorlist_contextmenu_item->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled);
+
 	treeWidget->editItem(actorlist_contextmenu_item, 0);
 }
 
-//#Slot for deleting an actor out of the scene and the actor-list.
+//Slot for deleting an actor out of the scene and the actor-list.
 void GUI::deleteActor() {
 	
-	//the subclass "actorlist_contextmenu_item" has an private reference on its actor, 
+	//the subclass "actorlist_contextmenu_item" has an private reference on its actor/assembly, 
 	//so we can easily remove the actor when removing the item
 	Ren1->RemoveActor(actorlist_contextmenu_item->getActorReference());
 	delete actorlist_contextmenu_item;
@@ -345,19 +350,23 @@ void GUI::deleteActor() {
 	VTKViewer->update();
 }
 
+//Slot for deactivating an actor/make him invisible
 void GUI::deactivateActor() {
 
 	actorlist_contextmenu_item->getActorReference()->VisibilityOff();
+
 	VTKViewer->update();
 }
 
+//Slot for reactivating an actor/make him visibile again
 void GUI::reactivateActor() {
 
 	actorlist_contextmenu_item->getActorReference()->VisibilityOn();
+
 	VTKViewer->update();
 }
 
-//#Slot for context menu in the actors-list.
+//Slot for context menu in the actors-list.
 void GUI::prepareMenu(const QPoint & pos)				
 {
 
@@ -392,12 +401,18 @@ void GUI::prepareMenu(const QPoint & pos)
 	}
 }
 
+//Slot for opening the Configurator window
 void GUI::openConfigurator() {
 
 	//TODO: gucken das kein Speicherleck entsteht
+	//we want to make sure, that we only open one instance of a Configurator
 	if (Configurator::open_instance == false) {
+
 		Configurator* actor_config = new Configurator();
 		actor_config->show();
+
+		//give the configurator-window a reference to this mainwindow, so we can 
+		//access GUI-members from the Configurator
 		actor_config->mainwindow = this;
 	
 	}
