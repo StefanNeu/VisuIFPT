@@ -1,4 +1,6 @@
-#pragma once
+#ifndef _Reader_h_
+#define _Reader_h_
+
 #include <string>
 #include <vtkPolyDataMapper.h>
 
@@ -9,3 +11,5 @@ void readPLY_p(vtkPolyDataMapper*, const std::string);
 void readPLY_s(vtkPolyDataMapper*, const std::string);
 void readSTL(vtkPolyDataMapper*, const std::string);
 void readPCD(vtkPolyDataMapper*, const std::string);
+
+#endif
