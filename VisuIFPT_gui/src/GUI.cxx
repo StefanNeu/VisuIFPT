@@ -1,7 +1,7 @@
 #include <GUI.h>	
 
 #include <HelpClasses.h>
-#include <Reader.h>				//for reading different types of files
+#include <include/Reader.h>				//for reading different types of files
 #include <Configurator.h>		//for creating a window of type Configurator
 
 #include <vtkActor.h>			//VTK/Qt usage
@@ -346,7 +346,15 @@ void GUI::deleteActor() {
 	
 	//the subclass "actorlist_contextmenu_item" has an private reference on its actor/assembly, 
 	//so we can easily remove the actor when removing the item
-	Ren1->RemoveActor(actorlist_contextmenu_item->getActorReference());
+
+	//we need to test if the item has an assembly or actor reference
+	if (actorlist_contextmenu_item->getActorReference() == NULL) {
+		Ren1->RemoveActor(actorlist_contextmenu_item->getAssemblyReference());
+	}
+	else {
+		Ren1->RemoveActor(actorlist_contextmenu_item->getActorReference());
+	}
+	
 	delete actorlist_contextmenu_item;
 
 	VTKViewer->update();
@@ -355,7 +363,12 @@ void GUI::deleteActor() {
 //Slot for deactivating an actor/make him invisible
 void GUI::deactivateActor() {
 
-	actorlist_contextmenu_item->getActorReference()->VisibilityOff();
+	if (actorlist_contextmenu_item->getActorReference() == NULL) {
+		actorlist_contextmenu_item->getAssemblyReference()->VisibilityOff();
+	}
+	else {
+		actorlist_contextmenu_item->getActorReference()->VisibilityOff();
+	}
 
 	VTKViewer->update();
 }
@@ -363,7 +376,12 @@ void GUI::deactivateActor() {
 //Slot for reactivating an actor/make him visibile again
 void GUI::reactivateActor() {
 
-	actorlist_contextmenu_item->getActorReference()->VisibilityOn();
+	if (actorlist_contextmenu_item->getActorReference() == NULL) {
+		actorlist_contextmenu_item->getAssemblyReference()->VisibilityOn();
+	}
+	else {
+		actorlist_contextmenu_item->getActorReference()->VisibilityOn();
+	}
 
 	VTKViewer->update();
 }

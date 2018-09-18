@@ -1,5 +1,5 @@
 #include "openPLY_dialog.h"
-#include "Reader.h"
+#include "include/Reader.h"
 
 openPLY_dialog::openPLY_dialog(int* openingMode) {
 

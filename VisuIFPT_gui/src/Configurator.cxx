@@ -1,7 +1,7 @@
 #include <Configurator.h>
 
 #include <HelpClasses.h>			//own headers
-#include <Reader.h>
+#include <include/Reader.h>
 
 #include <vtkRenderWindow.h>		//VTK usage
 #include <vtkRenderer.h>
