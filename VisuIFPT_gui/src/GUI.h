@@ -65,6 +65,10 @@ public slots:
 	//Opens the Configurator-Window
 	void openConfigurator();
 
+	//Process the closeEvent (clicking on the "x")
+	void closeEvent(QCloseEvent*);
+
+
 protected:
 
 	//This member manages connections between VTK and Qt objects

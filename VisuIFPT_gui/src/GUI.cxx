@@ -16,6 +16,8 @@
 #include <vtkCommand.h>
 #include <vtkAssembly.h>
 #include <qfiledialog.h>
+#include <QCloseEvent>			
+#include <QMessageBox>
 
 //----------- TESTED HEADERS ----------
 #include <vtkLightKit.h>
@@ -415,5 +417,22 @@ void GUI::openConfigurator() {
 		//access GUI-members from the Configurator
 		actor_config->mainwindow = this;
 	
+	}
+}
+
+//Safety warning when trying to close this window
+void GUI::closeEvent(QCloseEvent *event)
+{
+	QMessageBox::StandardButton resBtn = QMessageBox::question(this, QString("VisuIFPT"),
+		tr("Are you sure?\n"),
+		QMessageBox::No | QMessageBox::Yes,
+		QMessageBox::Yes);
+
+	if (resBtn != QMessageBox::Yes) {
+		event->ignore();
+
+	}
+	else {
+		event->accept();
 	}
 }

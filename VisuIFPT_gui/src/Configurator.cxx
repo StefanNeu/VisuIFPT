@@ -1,67 +1,52 @@
-#include "Configurator.h"
+#include <Configurator.h>
 
-#include <QMenu>
-#include <QVTKInteractor.h>
+#include <HelpClasses.h>			//own headers
+#include <Reader.h>
 
-#include "vtkActor.h"
-#include "vtkCommand.h"
-
-#include "vtkEventQtSlotConnect.h"
-#include "vtkPolyDataMapper.h"
-#include <vtkRenderWindow.h>
+#include <vtkRenderWindow.h>		//VTK usage
 #include <vtkRenderer.h>
-
-#include <istream>
-#include <qfiledialog.h>
-#include "Reader.h"
-#include <vtkPLYReader.h>
 #include <vtkAxesActor.h>
 #include <vtkOrientationMarkerWidget.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkActor.h>
 #include <vtkPlaneSource.h>
 #include <vtkCubeSource.h>
 #include <vtkSphereSource.h>
-#include <vtkShrinkFilter.h>
-#include <vtkNamedColors.h>
-#include <vtkDataSetMapper.h>
-#include <vtkProperty.h>
-#include <vtkInteractorStyleSwitch.h>
-#include <qtreewidget.h>
-#include <vtkTransform.h>
-#include <vtkCommand.h>
-#include <sstream>
-#include <iomanip> 
-#include "HelpClasses.h"
-#include <qtreewidget.h>
-#include <QCloseEvent>
+#include <qfiledialog.h>
+#include <QCloseEvent>			
 #include <QMessageBox>
-#include <vtkAssembly.h>
+
+//------------- TESTED HEADERS ---------------
+#include <vtkCommand.h>
 
 
+//Initialize this bool with false, since we have no instance.
 bool Configurator::open_instance = false;
 
-//#Constructor of our main window.
+
+//Constructor of the Configurator main window.
 Configurator::Configurator()
 {
 
-	
+	//when we create an instance, we want to trigger the open_instance bool to true!
 	open_instance = true;
 	
-
 	//sets up all qt objects (see ui_GUI.h)
 	this->setupUi(this);
 
+
+	//our new actor/assembly, that we are assembling in this configurator and that we will export
 	new_actor = vtkAssembly::New();
 	
-
-	// create a window to make it stereo capable and give it to QVTKWidget
-	vtkRenderWindow* renwin = vtkRenderWindow::New();				//very bad anti-aliasing with opengl instead of "default" render window!
-
+	//create renderwindow and assign it to the QVTKViewer
+	vtkRenderWindow* renwin = vtkRenderWindow::New();				
 	Actor_Viewer->SetRenderWindow(renwin);
 	renwin->Delete();
 
 	//add a renderer
 	Actor_Renderer = vtkRenderer::New();
 	Actor_Viewer->GetRenderWindow()->AddRenderer(Actor_Renderer);
+
 
 	//add an InteractionMode (derivitive from InteractionStyleSwitch) and set default to trackball_camera
 	style = style->New();
@@ -72,12 +57,14 @@ Configurator::Configurator()
 	//initialize interactor and add callback-object to update the viewer periodically
 	Actor_Viewer->GetRenderWindow()->GetInteractor()->Initialize();
 
+	//commented because of bugs
+	/*
 	vtkSmartPointer<vtkTimerCallback> cb =
 		vtkSmartPointer<vtkTimerCallback>::New();
 	Actor_Viewer->GetRenderWindow()->GetInteractor()->AddObserver(vtkCommand::TimerEvent, cb);
 
 	Actor_Viewer->GetRenderWindow()->GetInteractor()->CreateRepeatingTimer(100);
-	
+	*/
 
 
 	//creating a OrientationMarkerWidget
@@ -90,24 +77,29 @@ Configurator::Configurator()
 	widget->SetEnabled(1);
 	widget->InteractiveOn();
 
+
 	//---------------------- CONNECTIONS -------------------------------------
 
+	//Process click on QAction of Geo. Primitive menu 
 	connect(menuGeometric_Primitives, SIGNAL(triggered(QAction*)), this, SLOT(spawnPrimitive(QAction*)));
 
+	//Export actor to main window
 	connect(actionExport_to_Main_Window, SIGNAL(triggered()), this, SLOT(exportActor()));
-
 }
+
 
 Configurator::~Configurator()
 {
+	//make sure to delete everything!
 	Actor_Renderer->Delete();
-	
 }
 
+
 // TODO: muss wirklich der header QTreeWidget.h benutzt werden, damit QTreewidgetitem bekannt wird?
-//#Slot for transform-data.
+//Slot for displaying transform-data
 void Configurator::displayTransformData(QTreeWidgetItem* item, int) {
 
+	//see equivalent comments in GUI.cxx
 	Q_actorTreeWidgetItem* actor_item = dynamic_cast<Q_actorTreeWidgetItem*>(item);
 	vtkSmartPointer<vtkActor> actor =
 		vtkSmartPointer<vtkActor>::New();
@@ -132,6 +124,7 @@ void Configurator::displayTransformData(QTreeWidgetItem* item, int) {
 	y_loc->setText(QString(y_string.c_str()));
 	z_loc->setText(QString(z_string.c_str()));
 }
+
 
 // TODO: Actorliste einfügen?
 void Configurator::spawnPrimitive(QAction* primitive) {
@@ -190,15 +183,16 @@ void Configurator::spawnPrimitive(QAction* primitive) {
 		//item_name = "Sphere" + std::to_string(GUI::pri_sphereCount);
 	}
 
-	//create a vtkActor, connect with the vtkPolyDataMapper and add to Ren1
+	//create a vtkActor, connect with the vtkPolyDataMapper and add to the renderer of the Configurator
 	vtkSmartPointer<vtkActor> actor =
 		vtkSmartPointer<vtkActor>::New();
 
 	actor->SetMapper(polymapper);
 	
+	//we want to render the single actors, so we can still work with every single one independently
 	Actor_Renderer->AddActor(actor);
 	
-
+	//add every new actor to the assembly
 	new_actor->AddPart((vtkProp3D*)actor);
 
 	//create a new item for our actors-list
@@ -206,40 +200,31 @@ void Configurator::spawnPrimitive(QAction* primitive) {
 	//new_actor->setText(0, QString::fromStdString(item_name));
 
 	Actor_Viewer->update();
-
 }
 
-
-//Safety warning when trying to close this window
-void Configurator::closeEvent(QCloseEvent *event)
-{
-	QMessageBox::StandardButton resBtn = QMessageBox::question(this, QString("Configurator"),
-		tr("Are you sure?\n"),
-		QMessageBox::No | QMessageBox::Yes,
-		QMessageBox::Yes);
-	if (resBtn != QMessageBox::Yes) {
-		event->ignore();
-		
-	}
-	else {
-		event->accept();
-		open_instance = false;
-	}
-}
 
 //Slot function that adds the new_actor from the configurator to the renderer
 void Configurator::exportActor() {
 
+	//add the assembly to the main renderer from our main window and increment the new_actorCount
 	mainwindow->Ren1->AddActor(new_actor);
-
 	mainwindow->new_actorCount++;
 
+	//create a new item in the actors-list from the main window
 	Q_actorTreeWidgetItem* new_item = new Q_actorTreeWidgetItem(mainwindow->treeWidget, new_actor, 1);
 
 	new_item->setText(0, QString::fromStdString("ConfigItem" + std::to_string(mainwindow->new_actorCount)));
 
 	close();
 }
+
+
+//We need to process the closeEvent of the Configurator, so we can safely trigger the bool open_instance to false
+void Configurator::closeEvent(QCloseEvent *event)
+{
+		open_instance = false;
+}
+
 
 // TODO: Kameramodus updaten
 //#Slot for updating mouse-coordinates.
@@ -260,6 +245,7 @@ void Configurator::exportActor() {
 	coord->setText(str);
 }
 */
+
 
 // TODO: Option einbauen, um Primitive oder Files als "Bausteine" für einen Actor einzufügen
 /*
