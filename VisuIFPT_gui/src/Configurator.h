@@ -5,7 +5,7 @@
 #include <ui_configurator.h>		
 
 #include <HelpClasses.h>		
-#include <GUI.h>
+#include <MainWindow.h>
 
 #include <vtkRenderer.h>			//Qt/VTK usage
 #include <vtkAssembly.h>
@@ -25,7 +25,7 @@ public:
 	//makes sure we only have one open instance of the configurator (could also be solved with the singleton concept)
 	static bool open_instance;
 
-	//The reference to the GUI-mainwindow, so we can access some members of it
+	//The reference to the MainWindow, so we can access some members of it
 	MainWindow* mainwindow;
 
 public slots:

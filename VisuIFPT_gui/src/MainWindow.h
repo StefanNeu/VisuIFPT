@@ -68,13 +68,16 @@ public slots:
 	//Process the closeEvent (clicking on the "x")
 	void closeEvent(QCloseEvent*);
 
-
+	void camReposition(bool);
 protected:
 
 	//This member manages connections between VTK and Qt objects
 	vtkEventQtSlotConnect* Connections;
 
 private:
+
+	//Default false and if true, camera always repositions when a new actor is added, so that every actor is visible
+	static bool auto_camReposition;
 
 	//Polydatamapper for our files or geo. primitives
 	vtkSmartPointer<vtkPolyDataMapper> polymapper;

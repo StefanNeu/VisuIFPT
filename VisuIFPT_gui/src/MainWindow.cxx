@@ -30,13 +30,18 @@ int MainWindow::pri_planeCount = 0;
 int MainWindow::pri_cubeCount = 0;
 int MainWindow::pri_sphereCount = 0;
 int MainWindow::new_actorCount = 0;
-
+bool MainWindow::auto_camReposition = false;
 
 //#Constructor of our main window.
 MainWindow::MainWindow()
 {
 	//shutdown the VTK Debug window.
 	vtkObject::GlobalWarningDisplayOff();
+
+	//just that the checkBox for the automatic camera reposition is safely unchecked when the bool is false
+	if (MainWindow::auto_camReposition == true) {
+		checkBox->setChecked(false);
+	}
 
 	//sets up all Qt objects (see ui_MainWindow.h)
 	this->setupUi(this);
@@ -114,6 +119,8 @@ MainWindow::MainWindow()
 	//open the Configurator-window
 	connect(actionOpen, SIGNAL(triggered()), this, SLOT(openConfigurator()));
 	
+	
+	connect(checkBox, SIGNAL(clicked(bool)), this, SLOT(camReposition(bool)));
 
 	//this class is needed to manage Qt and VTK connections
 	Connections = vtkEventQtSlotConnect::New();
@@ -261,7 +268,12 @@ void MainWindow::openFile() {
 
 	new_actor->setText(0, QString::fromStdString(s_file + s_ext)); //TODO: numbering when you open same file more than one time
 
+	if (auto_camReposition == true) {
+		Ren1->ResetCamera();
+	}
+
 	VTKViewer->update();
+	
 }
 
 //Slot for spawning geometrical primitives.
@@ -332,8 +344,11 @@ void MainWindow::spawnPrimitive(QAction* primitive) {					// TODO: maybe even ou
 	Q_actorTreeWidgetItem* new_actor = new Q_actorTreeWidgetItem(treeWidget, actor, 1);
 	new_actor->setText(0, QString::fromStdString(item_name));
 
+	if (auto_camReposition == true) {
+		Ren1->ResetCamera();
+	}
+
 	VTKViewer->update();
-	
 }
 
 //Slot for renaming an actor in the actor-list.
@@ -456,5 +471,15 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	}
 	else {
 		event->accept();
+	}
+}
+
+void MainWindow::camReposition(bool ticked) {
+	
+	if (ticked == true) {
+		MainWindow::auto_camReposition = true;
+	}
+	else if (ticked == false) {
+		MainWindow::auto_camReposition = false;
 	}
 }

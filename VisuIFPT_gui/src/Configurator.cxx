@@ -31,7 +31,7 @@ Configurator::Configurator()
 	//when we create an instance, we want to trigger the open_instance bool to true!
 	open_instance = true;
 	
-	//sets up all qt objects (see ui_GUI.h)
+	//sets up all qt objects (see ui_MainWindow.h)
 	this->setupUi(this);
 
 
@@ -99,7 +99,7 @@ Configurator::~Configurator()
 //Slot for displaying transform-data
 void Configurator::displayTransformData(QTreeWidgetItem* item, int) {
 
-	//see equivalent comments in GUI.cxx
+	//see equivalent comments in MainWindow.cxx
 	Q_actorTreeWidgetItem* actor_item = dynamic_cast<Q_actorTreeWidgetItem*>(item);
 	vtkSmartPointer<vtkActor> actor =
 		vtkSmartPointer<vtkActor>::New();
@@ -150,8 +150,8 @@ void Configurator::spawnPrimitive(QAction* primitive) {
 		polymapper->SetInputData(plane);
 
 		//we want to give it a default name und numbering
-		//GUI::pri_planeCount++;
-		//item_name = "Plane" + std::to_string(GUI::pri_planeCount);
+		//MainWindow::pri_planeCount++;
+		//item_name = "Plane" + std::to_string(MainWindow::pri_planeCount);
 
 	}
 	else if (primitive->text() == "Cube") {
@@ -165,8 +165,8 @@ void Configurator::spawnPrimitive(QAction* primitive) {
 		vtkPolyData* cube = cubeSource->GetOutput();
 		polymapper->SetInputData(cube);
 
-		//GUI::pri_cubeCount++;
-		//item_name = "Cube" + std::to_string(GUI::pri_cubeCount);
+		//MainWindow::pri_cubeCount++;
+		//item_name = "Cube" + std::to_string(MainWindow::pri_cubeCount);
 
 	}
 	else if (primitive->text() == "Sphere") {
@@ -181,8 +181,8 @@ void Configurator::spawnPrimitive(QAction* primitive) {
 		vtkPolyData* sphere = sphereSource->GetOutput();
 		polymapper->SetInputData(sphere);
 
-		//GUI::pri_sphereCount++;
-		//item_name = "Sphere" + std::to_string(GUI::pri_sphereCount);
+		//MainWindow::pri_sphereCount++;
+		//item_name = "Sphere" + std::to_string(MainWindow::pri_sphereCount);
 	}
 
 	//create a vtkActor, connect with the vtkPolyDataMapper and add to the renderer of the Configurator
@@ -252,7 +252,7 @@ void Configurator::closeEvent(QCloseEvent *event)
 // TODO: Option einbauen, um Primitive oder Files als "Bausteine" für einen Actor einzufügen
 /*
 //#Slot for opening 3D-files.
-void GUI::openFile() {
+void MainWindow::openFile() {
 
 	//open QFileDialog to open file in the windows-explorer
 	QString q_filename = QFileDialog::getOpenFileName(this, tr("Open file"), "C:/", tr("3D Files(*.ply *.stl *.pcd)"));
@@ -297,7 +297,7 @@ void GUI::openFile() {
 }
 
 //#Slot for spawning geometrical primitives.
-void GUI::spawnPrimitive(QAction* primitive) {					// TODO: maybe even outsource the vtkPolyData (which we create in every if-case equally)?
+void MainWindow::spawnPrimitive(QAction* primitive) {					// TODO: maybe even outsource the vtkPolyData (which we create in every if-case equally)?
 
 	//the vtkPolyDataMapper that we fill with 
 	polymapper = vtkSmartPointer<vtkPolyDataMapper>::New();
@@ -318,8 +318,8 @@ void GUI::spawnPrimitive(QAction* primitive) {					// TODO: maybe even outsource
 		polymapper->SetInputData(plane);
 
 		//we want to give it a default name und numbering
-		GUI::pri_planeCount++;
-		item_name = "Plane" + std::to_string(GUI::pri_planeCount);
+		MainWindow::pri_planeCount++;
+		item_name = "Plane" + std::to_string(MainWindow::pri_planeCount);
 
 	}
 	else if (primitive->text() == "Cube") {
@@ -333,8 +333,8 @@ void GUI::spawnPrimitive(QAction* primitive) {					// TODO: maybe even outsource
 		vtkPolyData* cube = cubeSource->GetOutput();
 		polymapper->SetInputData(cube);
 
-		GUI::pri_cubeCount++;
-		item_name = "Cube" + std::to_string(GUI::pri_cubeCount);
+		MainWindow::pri_cubeCount++;
+		item_name = "Cube" + std::to_string(MainWindow::pri_cubeCount);
 	
 	}
 	else if (primitive->text() == "Sphere") {
@@ -347,8 +347,8 @@ void GUI::spawnPrimitive(QAction* primitive) {					// TODO: maybe even outsource
 		vtkPolyData* sphere = sphereSource->GetOutput();
 		polymapper->SetInputData(sphere);
 
-		GUI::pri_sphereCount++;
-		item_name = "Sphere" + std::to_string(GUI::pri_sphereCount);
+		MainWindow::pri_sphereCount++;
+		item_name = "Sphere" + std::to_string(MainWindow::pri_sphereCount);
 	}
 
 	//create a vtkActor, connect with the vtkPolyDataMapper and add to Ren1
