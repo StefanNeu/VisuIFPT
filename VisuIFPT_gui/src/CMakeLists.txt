@@ -24,7 +24,7 @@ set( Hdrs MainWindow.h include/Reader.h HelpClasses.h Configurator.h openPLY_dia
 
 set( MOC_Hdrs MainWindow.h include/Reader.h HelpClasses.h Configurator.h openPLY_dialog.h)
 
-set( UIs GUI.ui openPLY_dialog.ui Configurator.ui)
+set( UIs MainWindow.ui openPLY_dialog.ui Configurator.ui)
 
 
 

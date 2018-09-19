@@ -1,8 +1,8 @@
-#include <GUI.h>	
+#include <MainWindow.h>	
 
 #include <HelpClasses.h>
-#include <include/Reader.h>				//for reading different types of files
-#include <Configurator.h>		//for creating a window of type Configurator
+#include <include/Reader.h>			//for reading different types of files
+#include <Configurator.h>			//for creating a window of type Configurator
 
 #include <vtkActor.h>			//VTK/Qt usage
 #include <vtkPolyDataMapper.h>
@@ -26,19 +26,19 @@
 
 
 //Initialize static counters for items from the actors-list (just for naming purposes)
-int GUI::pri_planeCount = 0;
-int GUI::pri_cubeCount = 0;
-int GUI::pri_sphereCount = 0;
-int GUI::new_actorCount = 0;
+int MainWindow::pri_planeCount = 0;
+int MainWindow::pri_cubeCount = 0;
+int MainWindow::pri_sphereCount = 0;
+int MainWindow::new_actorCount = 0;
 
 
 //#Constructor of our main window.
-GUI::GUI()
+MainWindow::MainWindow()
 {
 	//shutdown the VTK Debug window.
 	vtkObject::GlobalWarningDisplayOff();
 
-	//sets up all Qt objects (see ui_GUI.h)
+	//sets up all Qt objects (see ui_MainWindow.h)
 	this->setupUi(this);
 
 	//create a vtkRenderWindow, that we want to assign to the QVTKViewer
@@ -126,7 +126,7 @@ GUI::GUI()
 
 }
 
-GUI::~GUI()
+MainWindow::~MainWindow()
 {
 	//make sure to delete everything to avoid leaks!
 	Ren1->Delete();
@@ -138,8 +138,10 @@ GUI::~GUI()
 	delete actorlist_contextmenu_item;
 }
 
+//------------------- SLOT FUNCTIONS -----------------------------
+
 //Slot for transform-data.
-void GUI::displayTransformData(QTreeWidgetItem* item, int) {
+void MainWindow::displayTransformData(QTreeWidgetItem* item, int) {
 
 	double* position = new double[3];
 	double* rotation = new double[3];
@@ -197,7 +199,7 @@ void GUI::displayTransformData(QTreeWidgetItem* item, int) {
 }
 
 //#Slot for updating mouse-coordinates.
-void GUI::updateCoords(vtkObject* obj)
+void MainWindow::updateCoords(vtkObject* obj)
 {
 	//get interactor
 	vtkRenderWindowInteractor* iren = vtkRenderWindowInteractor::SafeDownCast(obj);
@@ -216,7 +218,7 @@ void GUI::updateCoords(vtkObject* obj)
 }
 
 //Slot for opening 3D-files.
-void GUI::openFile() {
+void MainWindow::openFile() {
 
 	//open QFileDialog to open file in the windows-explorer
 	QString q_filename = QFileDialog::getOpenFileName(this, tr("Open file"), "C:/", tr("3D Files(*.ply *.stl *.pcd)"));
@@ -263,7 +265,7 @@ void GUI::openFile() {
 }
 
 //Slot for spawning geometrical primitives.
-void GUI::spawnPrimitive(QAction* primitive) {					// TODO: maybe even outsource the vtkPolyData (which we create in every if-case equally)?
+void MainWindow::spawnPrimitive(QAction* primitive) {					// TODO: maybe even outsource the vtkPolyData (which we create in every if-case equally)?
 
 	//the vtkPolyDataMapper that we fill with 
 	polymapper = vtkSmartPointer<vtkPolyDataMapper>::New();
@@ -284,8 +286,8 @@ void GUI::spawnPrimitive(QAction* primitive) {					// TODO: maybe even outsource
 		polymapper->SetInputData(plane);
 
 		//we want to give it a default name und numbering
-		GUI::pri_planeCount++;
-		item_name = "Plane" + std::to_string(GUI::pri_planeCount);
+		MainWindow::pri_planeCount++;
+		item_name = "Plane" + std::to_string(MainWindow::pri_planeCount);
 
 	}
 	else if (primitive->text() == "Cube") {
@@ -299,8 +301,8 @@ void GUI::spawnPrimitive(QAction* primitive) {					// TODO: maybe even outsource
 		vtkPolyData* cube = cubeSource->GetOutput();
 		polymapper->SetInputData(cube);
 
-		GUI::pri_cubeCount++;
-		item_name = "Cube" + std::to_string(GUI::pri_cubeCount);
+		MainWindow::pri_cubeCount++;
+		item_name = "Cube" + std::to_string(MainWindow::pri_cubeCount);
 	
 	}
 	else if (primitive->text() == "Sphere") {
@@ -315,8 +317,8 @@ void GUI::spawnPrimitive(QAction* primitive) {					// TODO: maybe even outsource
 		vtkPolyData* sphere = sphereSource->GetOutput();
 		polymapper->SetInputData(sphere);
 
-		GUI::pri_sphereCount++;
-		item_name = "Sphere" + std::to_string(GUI::pri_sphereCount);
+		MainWindow::pri_sphereCount++;
+		item_name = "Sphere" + std::to_string(MainWindow::pri_sphereCount);
 	}
 
 	//create a vtkActor, connect with the vtkPolyDataMapper and add to Ren1
@@ -335,7 +337,7 @@ void GUI::spawnPrimitive(QAction* primitive) {					// TODO: maybe even outsource
 }
 
 //Slot for renaming an actor in the actor-list.
-void GUI::renameActor() {
+void MainWindow::renameActor() {
 
 	//we need to make the item editable (setFlags) to edit it in the next step
 	actorlist_contextmenu_item->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled);
@@ -344,7 +346,7 @@ void GUI::renameActor() {
 }
 
 //Slot for deleting an actor out of the scene and the actor-list.
-void GUI::deleteActor() {
+void MainWindow::deleteActor() {
 	
 	//the subclass "actorlist_contextmenu_item" has an private reference on its actor/assembly, 
 	//so we can easily remove the actor when removing the item
@@ -363,7 +365,7 @@ void GUI::deleteActor() {
 }
 
 //Slot for deactivating an actor/make him invisible
-void GUI::deactivateActor() {
+void MainWindow::deactivateActor() {
 
 	if (actorlist_contextmenu_item->getActorReference() == NULL) {
 		actorlist_contextmenu_item->getAssemblyReference()->VisibilityOff();
@@ -376,7 +378,7 @@ void GUI::deactivateActor() {
 }
 
 //Slot for reactivating an actor/make him visibile again
-void GUI::reactivateActor() {
+void MainWindow::reactivateActor() {
 
 	if (actorlist_contextmenu_item->getActorReference() == NULL) {
 		actorlist_contextmenu_item->getAssemblyReference()->VisibilityOn();
@@ -389,7 +391,7 @@ void GUI::reactivateActor() {
 }
 
 //Slot for context menu in the actors-list.
-void GUI::prepareMenu(const QPoint & pos)				
+void MainWindow::prepareMenu(const QPoint & pos)				
 {
 
 	//we want to check if we clicked on an item, otherwise we DONT want a context menu!
@@ -424,7 +426,7 @@ void GUI::prepareMenu(const QPoint & pos)
 }
 
 //Slot for opening the Configurator window
-void GUI::openConfigurator() {
+void MainWindow::openConfigurator() {
 
 	//TODO: gucken das kein Speicherleck entsteht
 	//we want to make sure, that we only open one instance of a Configurator
@@ -434,14 +436,14 @@ void GUI::openConfigurator() {
 		actor_config->show();
 
 		//give the configurator-window a reference to this mainwindow, so we can 
-		//access GUI-members from the Configurator
+		//access MainWindow-members from the Configurator
 		actor_config->mainwindow = this;
 	
 	}
 }
 
-//Safety warning when trying to close this window
-void GUI::closeEvent(QCloseEvent *event)
+//Slot for safety warning when trying to close this window
+void MainWindow::closeEvent(QCloseEvent *event)
 {
 	QMessageBox::StandardButton resBtn = QMessageBox::question(this, QString("VisuIFPT"),
 		tr("Are you sure?\n"),

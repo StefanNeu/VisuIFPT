@@ -1,8 +1,8 @@
-#ifndef _GUI_h
-#define _GUI_h
+#ifndef _MainWindow_h
+#define _MainWindow_h
 
 #include <QMainWindow>		//for inheritance
-#include "ui_GUI.h"			//for inheritance
+#include "ui_MainWindow.h"			//for inheritance
 
 #include "HelpClasses.h"		//for some outsourced utility function 
 
@@ -12,16 +12,16 @@
 
 
 //The MainWindow-Class, that derives from QMainWindow and
-//Ui::GUI (for members/object that we configured in Qt-Designer)
-class GUI : public QMainWindow, public Ui::GUI
+//Ui::MainWindow (for members/object that we configured in Qt-Designer)
+class MainWindow : public QMainWindow, public Ui::MainWindow
 {
 	//internal makro by Qt
 	Q_OBJECT
 
 public:
 	
-	GUI();
-	~GUI();
+	MainWindow();
+	~MainWindow();
 
 	//currently our only renderer of the scene
 	vtkRenderer * Ren1;
@@ -87,4 +87,4 @@ private:
 
 };
 
-#endif // _GUI_h
+#endif // _MainWindow_h

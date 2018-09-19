@@ -36,10 +36,10 @@ int main(int argc, char** argv)
 	QVTKApplication app(argc, argv);
 
 	//the mainwindow of type GUI (see GUI.h and GUI.cxx)
-	MainWindow mainwindow;
+	MainWindow mainwin;
 
 	//the window isn't shown by default, we need to show it explicitly
-	mainwindow.show();
+	mainwin.show();
 
 	//and finally .exec() needs to be called to start the Qt-program
 	return app.exec();
