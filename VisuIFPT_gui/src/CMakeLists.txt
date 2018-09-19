@@ -17,12 +17,12 @@ include(${VTK_USE_FILE})
 
 
 # Setting a few variables for us.
-set( Srcs main.cxx GUI.cxx Reader.cxx Helpclasses.cxx Configurator.cxx openPLY_dialog.cxx)
+set( Srcs main.cxx MainWindow.cxx Reader.cxx Helpclasses.cxx Configurator.cxx openPLY_dialog.cxx)
 
 # maybe organize headers and cxx in different folders?
-set( Hdrs GUI.h include/Reader.h HelpClasses.h Configurator.h openPLY_dialog.h)
+set( Hdrs MainWindow.h include/Reader.h HelpClasses.h Configurator.h openPLY_dialog.h)
 
-set( MOC_Hdrs GUI.h include/Reader.h HelpClasses.h Configurator.h openPLY_dialog.h)
+set( MOC_Hdrs MainWindow.h include/Reader.h HelpClasses.h Configurator.h openPLY_dialog.h)
 
 set( UIs GUI.ui openPLY_dialog.ui Configurator.ui)
 

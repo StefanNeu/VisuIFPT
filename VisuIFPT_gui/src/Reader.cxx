@@ -10,7 +10,7 @@
 #include <string>
 #include <sstream>
 			
-//----------------------------FUNCTIONS FOR PROCESSING THE KEYWORDS IN PLY AND PCD------------------
+//----------------------------FUNCTIONS FOR PROCESSING THE HEADER KEYWORDS IN PLY AND PCD------------------
 //function that processes keywords in a PLY-header
 int processKeywords_PLY(std::string line, long* point_count) {								
 

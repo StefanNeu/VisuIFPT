@@ -26,7 +26,7 @@ public:
 	static bool open_instance;
 
 	//The reference to the GUI-mainwindow, so we can access some members of it
-	GUI* mainwindow;
+	MainWindow* mainwindow;
 
 public slots:
 

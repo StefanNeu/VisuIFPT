@@ -173,6 +173,8 @@ void Configurator::spawnPrimitive(QAction* primitive) {
 
 		vtkSmartPointer<vtkSphereSource> sphereSource =
 			vtkSmartPointer<vtkSphereSource>::New();
+		sphereSource->SetThetaResolution(30);
+		sphereSource->SetPhiResolution(30);
 		sphereSource->SetCenter(0.0, 0.0, 0.0);
 		sphereSource->Update();
 

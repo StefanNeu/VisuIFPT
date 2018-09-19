@@ -22,9 +22,9 @@ http://www.trolltech.com/products/3rdparty/vtksupport.html
 !!! license.
 =========================================================================*/
 
-#include "QVTKApplication.h"
+#include <QVTKApplication.h>
 
-#include "GUI.h"				//for creating our main window
+#include <MainWindow.h>				//for creating our main window
 
 //MAIN entry point for the program!
 int main(int argc, char** argv)
@@ -36,7 +36,7 @@ int main(int argc, char** argv)
 	QVTKApplication app(argc, argv);
 
 	//the mainwindow of type GUI (see GUI.h and GUI.cxx)
-	GUI mainwindow;
+	MainWindow mainwindow;
 
 	//the window isn't shown by default, we need to show it explicitly
 	mainwindow.show();
