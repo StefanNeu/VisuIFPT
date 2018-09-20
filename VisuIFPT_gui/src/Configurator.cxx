@@ -40,31 +40,32 @@ Configurator::Configurator()
 	
 	//create renderwindow and assign it to the QVTKViewer
 	vtkRenderWindow* renwin = vtkRenderWindow::New();				
-	Actor_Viewer->SetRenderWindow(renwin);
+	ConfiguratorViewer->SetRenderWindow(renwin);
 	renwin->Delete();
 
 	//add a renderer
 	configuratorRen = vtkRenderer::New();
-	Actor_Viewer->GetRenderWindow()->AddRenderer(configuratorRen);
+	ConfiguratorViewer->GetRenderWindow()->AddRenderer(configuratorRen);
 
+	//allocate memory for the actorcounter of the configurator
 	configurator_ActorCounter = new ActorCounter;
 
 	//add an InteractionMode (derivitive from InteractionStyleSwitch) and set default to trackball_camera
 	style = style->New();
 	style->SetCurrentStyleToTrackballCamera();
-	Actor_Viewer->GetRenderWindow()->GetInteractor()->SetInteractorStyle(style);
+	ConfiguratorViewer->GetRenderWindow()->GetInteractor()->SetInteractorStyle(style);
 
 
 	//initialize interactor and add callback-object to update the viewer periodically
-	Actor_Viewer->GetRenderWindow()->GetInteractor()->Initialize();
+	ConfiguratorViewer->GetRenderWindow()->GetInteractor()->Initialize();
 
 	//commented because of bugs
 	/*
 	vtkSmartPointer<vtkTimerCallback> cb =
 		vtkSmartPointer<vtkTimerCallback>::New();
-	Actor_Viewer->GetRenderWindow()->GetInteractor()->AddObserver(vtkCommand::TimerEvent, cb);
+	ConfiguratorViewer->GetRenderWindow()->GetInteractor()->AddObserver(vtkCommand::TimerEvent, cb);
 
-	Actor_Viewer->GetRenderWindow()->GetInteractor()->CreateRepeatingTimer(100);
+	ConfiguratorViewer->GetRenderWindow()->GetInteractor()->CreateRepeatingTimer(100);
 	*/
 
 
@@ -73,7 +74,7 @@ Configurator::Configurator()
 	vtkOrientationMarkerWidget* widget = vtkOrientationMarkerWidget::New();
 	widget->SetOutlineColor(0.9300, 0.5700, 0.1300);
 	widget->SetOrientationMarker(axes);
-	widget->SetInteractor(Actor_Viewer->GetRenderWindow()->GetInteractor());
+	widget->SetInteractor(ConfiguratorViewer->GetRenderWindow()->GetInteractor());
 	widget->SetViewport(0.0, 0.0, 0.12, 0.12);
 	widget->SetEnabled(1);
 	widget->InteractiveOn();
@@ -132,7 +133,7 @@ void Configurator::spawnPrimitive(QAction* primitive) {
 
 	spawnGeoPrimitives(primitive, configuratorRen, NULL, configurator_ActorCounter);
 
-	Actor_Viewer->update();
+	ConfiguratorViewer->update();
 }
 
 
@@ -144,7 +145,7 @@ void Configurator::exportActor() {
 	mainwindow->mainWindow_ActorCounter->assemblyCount;
 
 	//create a new item in the actors-list from the main window
-	Q_actorTreeWidgetItem* new_item = new Q_actorTreeWidgetItem(mainwindow->treeWidget, new_actor, 1);
+	Q_actorTreeWidgetItem* new_item = new Q_actorTreeWidgetItem(mainwindow->mainWindow_actorList, new_actor, 1);
 
 	new_item->setText(0, QString::fromStdString("ConfigItem" + std::to_string(mainwindow->mainWindow_ActorCounter->assemblyCount)));
 

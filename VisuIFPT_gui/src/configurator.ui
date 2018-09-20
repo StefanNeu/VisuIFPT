@@ -14,7 +14,7 @@
    <string>Configurator</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QVTKWidget" name="Actor_Viewer" native="true">
+   <widget class="QVTKWidget" name="ConfiguratorViewer" native="true">
     <property name="geometry">
      <rect>
       <x>10</x>

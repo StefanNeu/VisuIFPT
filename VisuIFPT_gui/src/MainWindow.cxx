@@ -24,17 +24,11 @@
 #include <vtkLight.h>
 #include <vtkLightCollection.h>
 
-
-//Initialize static counters for items from the actors-list (just for naming purposes)
-/*int MainWindow::pri_planeCount = 0;
-int MainWindow::pri_cubeCount = 0;
-int MainWindow::pri_sphereCount = 0;
-int MainWindow::new_actorCount = 0;
-
-*/
+//Initializing the automatic camera repositioning with false
 bool MainWindow::auto_camReposition = false;
 
-//#Constructor of our main window.
+
+//Constructor of our main window.
 MainWindow::MainWindow()
 {
 	//shutdown the VTK Debug window.
@@ -42,7 +36,7 @@ MainWindow::MainWindow()
 
 	//just that the checkBox for the automatic camera reposition is safely unchecked when the bool is false
 	if (MainWindow::auto_camReposition == true) {
-		checkBox->setChecked(false);
+		checkBox_autoCamRepos->setChecked(false);
 	}
 
 	//sets up all Qt objects (see ui_MainWindow.h)
@@ -57,6 +51,7 @@ MainWindow::MainWindow()
 	Ren1 = vtkRenderer::New();
 	VTKViewer->GetRenderWindow()->AddRenderer(Ren1);
 
+	//allocate memory for the actorcounter of the mainwindow
 	mainWindow_ActorCounter = new ActorCounter;
 	
 	// Example for making an explicit light source that DOESN'T move with the camera/observer (like in reality)
@@ -114,16 +109,16 @@ MainWindow::MainWindow()
 	connect(menuGeometric_Primitives, SIGNAL(triggered(QAction*)), this, SLOT(spawnPrimitive(QAction*)));
 
 	//connection for context menu in our actors-list
-	connect(treeWidget, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(prepareMenu(const QPoint&)));
+	connect(mainWindow_actorList, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(prepareMenu(const QPoint&)));
 
 	//updating the transform-data in the inspector, when item in actors-list is clicked
-	connect(treeWidget, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this, SLOT(displayTransformData(QTreeWidgetItem*, int)));
+	connect(mainWindow_actorList, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this, SLOT(displayTransformData(QTreeWidgetItem*, int)));
 
 	//open the Configurator-window
-	connect(actionOpen, SIGNAL(triggered()), this, SLOT(openConfigurator()));
+	connect(actionOpen_Config, SIGNAL(triggered()), this, SLOT(openConfigurator()));
 	
 	
-	connect(checkBox, SIGNAL(clicked(bool)), this, SLOT(camReposition(bool)));
+	connect(checkBox_autoCamRepos, SIGNAL(clicked(bool)), this, SLOT(camReposition(bool)));
 
 	//this class is needed to manage Qt and VTK connections
 	Connections = vtkEventQtSlotConnect::New();
@@ -147,6 +142,7 @@ MainWindow::~MainWindow()
 	// TODO: test if we have data leaks.
 	delete actorlist_contextmenu_item;
 }
+
 
 //------------------- SLOT FUNCTIONS -----------------------------
 
@@ -208,11 +204,12 @@ void MainWindow::displayTransformData(QTreeWidgetItem* item, int) {
 	z_rot->setText(QString(z_stringROT.c_str()));
 }
 
-//#Slot for updating mouse-coordinates.
+//Slot for updating mouse-coordinates.
 void MainWindow::updateCoords(vtkObject* obj)
 {
 	//get interactor
 	vtkRenderWindowInteractor* iren = vtkRenderWindowInteractor::SafeDownCast(obj);
+
 	//get event position
 	int event_pos[2];
 	iren->GetEventPosition(event_pos);
@@ -224,13 +221,13 @@ void MainWindow::updateCoords(vtkObject* obj)
 	//update label
 	QString str;
 	str.sprintf("Mode:  %s     %s                      x=%d : y=%d", ac_or_cam.c_str(), joy_or_tra.c_str(), event_pos[0], event_pos[1]);
-	coord->setText(str);
+	coordinates->setText(str);
 }
 
 //Slot for opening 3D-files.
 void MainWindow::openFile_MainWindow() {
 
-	openFile(Ren1, this, treeWidget);
+	openFile(Ren1, this, mainWindow_actorList);
 
 	if (auto_camReposition == true) {
 		Ren1->ResetCamera();
@@ -245,7 +242,7 @@ void MainWindow::openFile_MainWindow() {
 void MainWindow::spawnPrimitive(QAction* primitive) {				
 	
 	//we use a outsourced function in HelpClasses.cxx to spawn the primitives
-	spawnGeoPrimitives(primitive, Ren1, treeWidget, mainWindow_ActorCounter);
+	spawnGeoPrimitives(primitive, Ren1, mainWindow_actorList, mainWindow_ActorCounter);
 
 	if (auto_camReposition == true) {
 		Ren1->ResetCamera();
@@ -260,7 +257,7 @@ void MainWindow::renameActor() {
 	//we need to make the item editable (setFlags) to edit it in the next step
 	actorlist_contextmenu_item->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled);
 
-	treeWidget->editItem(actorlist_contextmenu_item, 0);
+	mainWindow_actorList->editItem(actorlist_contextmenu_item, 0);
 }
 
 //Slot for deleting an actor out of the scene and the actor-list.
@@ -313,10 +310,10 @@ void MainWindow::prepareMenu(const QPoint & pos)
 {
 
 	//we want to check if we clicked on an item, otherwise we DONT want a context menu!
-	if (treeWidget->itemAt(pos) != NULL) {
+	if (mainWindow_actorList->itemAt(pos) != NULL) {
 
 		//get the item we clicked on
-		actorlist_contextmenu_item = dynamic_cast<Q_actorTreeWidgetItem*>(treeWidget->itemAt(pos));
+		actorlist_contextmenu_item = dynamic_cast<Q_actorTreeWidgetItem*>(mainWindow_actorList->itemAt(pos));
 
 		//create two QActions and connect them to the corresponding slot-functions
 		QAction *renameAct = new QAction(QString("Rename"), this);
@@ -339,7 +336,7 @@ void MainWindow::prepareMenu(const QPoint & pos)
 		menu.addAction(deactivateAct);
 		menu.addAction(reactivateAct);
 
-		menu.exec(treeWidget->mapToGlobal(pos));
+		menu.exec(mainWindow_actorList->mapToGlobal(pos));
 	}
 }
 
@@ -377,6 +374,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	}
 }
 
+//Slot for controlling the option of automatic camera reposition
 void MainWindow::camReposition(bool ticked) {
 	
 	if (ticked == true) {

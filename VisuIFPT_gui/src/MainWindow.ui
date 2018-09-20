@@ -67,7 +67,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QTreeWidget" name="treeWidget">
+       <widget class="QTreeWidget" name="mainWindow_actorList">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
           <horstretch>0</horstretch>
@@ -133,7 +133,7 @@
       <property name="title">
        <string>Inspector</string>
       </property>
-      <widget class="QLabel" name="coord">
+      <widget class="QLabel" name="coordinates">
        <property name="geometry">
         <rect>
          <x>20</x>
@@ -330,7 +330,7 @@
         <set>Qt::AlignCenter</set>
        </property>
       </widget>
-      <widget class="QCheckBox" name="checkBox">
+      <widget class="QCheckBox" name="checkBox_autoCamRepos">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -373,7 +373,7 @@
      </property>
      <addaction name="spawnPlane"/>
      <addaction name="spawnCube"/>
-     <addaction name="actionSphere"/>
+     <addaction name="spawnSphere"/>
     </widget>
     <addaction name="menuGeometric_Primitives"/>
    </widget>
@@ -381,7 +381,7 @@
     <property name="title">
      <string>Configurator</string>
     </property>
-    <addaction name="actionOpen"/>
+    <addaction name="actionOpen_Config"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menuAdd"/>
@@ -418,12 +418,12 @@
     <string>Cube</string>
    </property>
   </action>
-  <action name="actionSphere">
+  <action name="spawnSphere">
    <property name="text">
     <string>Sphere</string>
    </property>
   </action>
-  <action name="actionOpen">
+  <action name="actionOpen_Config">
    <property name="text">
     <string>Open Configurator</string>
    </property>
