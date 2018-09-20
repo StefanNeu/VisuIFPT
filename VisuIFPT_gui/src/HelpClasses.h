@@ -13,12 +13,13 @@
 class Q_actorTreeWidgetItem : public QTreeWidgetItem {
 public:
 
-	//constructor that accepts a actor as reference
+	//constructor that accepts an actor as reference
 	Q_actorTreeWidgetItem(QTreeWidget* view, vtkActor* referenced_actor, int type = 1) : QTreeWidgetItem(view, type) {
 		refToActor = referenced_actor;
 		refToAssembly = NULL;
 	}
 
+	//Constructor that accepts an assembly as reference
 	Q_actorTreeWidgetItem(QTreeWidget* view, vtkAssembly* referenced_assembly, int type = 1) : QTreeWidgetItem(view, type) {
 		refToAssembly = referenced_assembly;
 		refToActor = NULL;
@@ -61,4 +62,9 @@ public:
 		void * vtkNotUsed(callData));
 };
 
+//Function for opening 3D-files. 
+//- renderer is the renderer you want to add the new actor to
+//- parent_widget is the parent of the (Windows) File Dialog.. you can use the "this" pointer of the window
+//- item_list is the treewidget, where you want the actor to be listed as an item
+void openFile(vtkRenderer* renderer, QWidget* parent_widget, QTreeWidget* item_list);
 #endif

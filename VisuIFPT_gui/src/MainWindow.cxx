@@ -105,7 +105,7 @@ MainWindow::MainWindow()
 	//--------------------------- CONNECTIONS -----------------------------------------
 
 	//connection from (button) QAction* Open_File to the SLOT with function openFile(), when triggered
-	connect(actionOpen_File, SIGNAL(triggered()), this, SLOT(openFile()));
+	connect(actionOpen_File, SIGNAL(triggered()), this, SLOT(openFile_MainWindow()));
 
 	//same connection as above, but we process the press on the menu and the following press on the QAction* in the SLOT-function
 	connect(menuGeometric_Primitives, SIGNAL(triggered(QAction*)), this, SLOT(spawnPrimitive(QAction*)));
@@ -225,54 +225,16 @@ void MainWindow::updateCoords(vtkObject* obj)
 }
 
 //Slot for opening 3D-files.
-void MainWindow::openFile() {
+void MainWindow::openFile_MainWindow() {
 
-	//open QFileDialog to open file in the windows-explorer
-	QString q_filename = QFileDialog::getOpenFileName(this, tr("Open file"), "C:/", tr("3D Files(*.ply *.stl *.pcd)"));
-	std::string filename = q_filename.toStdString();
-
-	polymapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-	
-	//we test if we find the file-extension ply/stl or pcd
-	if (filename.find(".ply") != std::string::npos) {	
-		
-		//openPLY_dialog* dialog = new openPLY_dialog();
-		//dialog->exec();
-
-		//open file and read content into the polymapper
-		readPLY_p(polymapper, filename);
-
-	}
-	else if (filename.find(".stl") != std::string::npos) {
-		readSTL(polymapper, filename);
-	}
-	else if (filename.find(".pcd") != std::string::npos) {
-		readPCD(polymapper, filename);
-	}
-
-	//create c_string and use _splitpath_s() to fill them with the filename-data
-	char* file = new char[50];
-	char* ext = new char[10];
-	_splitpath_s(filename.c_str(), NULL, 0, NULL, 0, file, 30, ext, 30);
-	std::string s_file = file;
-	std::string s_ext = ext;
-
-	//create actor, connect to polymapper and add to renderer
-	vtkSmartPointer<vtkActor> actor =
-		vtkSmartPointer<vtkActor>::New();
-	actor->SetMapper(polymapper);
-	Ren1->AddViewProp(actor);
-
-	//new TreeWidgetItem for the actors_list
-	Q_actorTreeWidgetItem* new_actor = new Q_actorTreeWidgetItem(treeWidget, actor, 1);
-
-	new_actor->setText(0, QString::fromStdString(s_file + s_ext)); //TODO: numbering when you open same file more than one time
+	openFile(Ren1, this, treeWidget);
 
 	if (auto_camReposition == true) {
 		Ren1->ResetCamera();
 	}
-
+	
 	VTKViewer->update();
+	cout << ">> The file was loaded successfully!" << endl;
 	
 }
 

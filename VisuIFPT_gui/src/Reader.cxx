@@ -77,7 +77,7 @@ void readPLY_p(vtkPolyDataMapper* mapper, const std::string filename) {
 	//the vertex_count, that we will read in the header of the ply
 	long int vertex_count = 0;				
 
-
+	
 	//--------------------------------READING THE HEADER---------------------------------------------
 
 	//we read one line from the file at a time and process it
@@ -101,7 +101,7 @@ void readPLY_p(vtkPolyDataMapper* mapper, const std::string filename) {
 
 	vtkSmartPointer<vtkPoints> points =
 		vtkSmartPointer<vtkPoints>::New();
-
+	
 	//we read the points in a for-loop that is limited by the vertex_count
 	for (int i = 0; i < vertex_count; i++) {
 
@@ -117,7 +117,7 @@ void readPLY_p(vtkPolyDataMapper* mapper, const std::string filename) {
 	}
 
 	file.close();
-
+	
 
 	//----------------------------CREATING THE POLYDATA,FILTER AND MAPPER--------------------------------
 
@@ -126,7 +126,7 @@ void readPLY_p(vtkPolyDataMapper* mapper, const std::string filename) {
 
 	//give polydata our points
 	polydata->SetPoints(points);									
-
+	
 	//use an vertexglyphfilter 
 	vtkSmartPointer<vtkVertexGlyphFilter> vertexGlyphFilter =
 		vtkSmartPointer<vtkVertexGlyphFilter>::New();
@@ -135,6 +135,7 @@ void readPLY_p(vtkPolyDataMapper* mapper, const std::string filename) {
 	vertexGlyphFilter->Update();
 	
 	mapper->SetInputConnection(vertexGlyphFilter->GetOutputPort());
+	
 }
 
 //Function for reading a PLY-file in "standard mode", so with edges and faces

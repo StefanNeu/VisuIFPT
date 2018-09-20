@@ -39,7 +39,7 @@ public slots:
 	void updateCoords(vtkObject*);
 
 	//Open 3D-files
-	void openFile();
+	void openFile_MainWindow();
 
 	//Spawn geometrical primitives
 	void spawnPrimitive(QAction*);
