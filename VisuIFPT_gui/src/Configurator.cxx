@@ -63,11 +63,13 @@ Configurator::Configurator()
 	/*
 	vtkSmartPointer<vtkTimerCallback> cb =
 		vtkSmartPointer<vtkTimerCallback>::New();
+	cb->window =
+
 	ConfiguratorViewer->GetRenderWindow()->GetInteractor()->AddObserver(vtkCommand::TimerEvent, cb);
 
 	ConfiguratorViewer->GetRenderWindow()->GetInteractor()->CreateRepeatingTimer(100);
+	
 	*/
-
 
 	//creating a OrientationMarkerWidget
 	vtkAxesActor* axes = vtkAxesActor::New();

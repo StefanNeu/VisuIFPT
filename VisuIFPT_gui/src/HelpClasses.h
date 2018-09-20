@@ -56,9 +56,12 @@ public:
 //Callback class used for updating the QVTKWidget periodically
 class vtkTimerCallback : public vtkCommand {
 public:
+
 	static vtkTimerCallback* New();
+
 	virtual void Execute(vtkObject *caller, unsigned long eventId,
 		void * vtkNotUsed(callData));
+
 };
 
 
@@ -72,16 +75,16 @@ public:
 	int assemblyCount = 0;
 };
 
+
 //---------------- USEFUL FUNCTIONS -------------------------
 
-
-//Function for opening 3D-files. 
+//-----Function for opening 3D-files. 
 //- "renderer" is the renderer you want to add the new actor to
 //- "parent_widget" is the parent of the (Windows) File Dialog.. you can use the "this" pointer of the window
 //- "item_list" is the treewidget, where you want the actor to be listed as an item
 void openFile(vtkRenderer* renderer, QWidget* parent_widget, QTreeWidget* item_list);
 
-//Function for spawning geometrical primitives.
+//-----Function for spawning geometrical primitives.
 //- "primitive" the QAction that the user pressed on.. important for the slot-principle of Qt!
 //- "renderer" is the renderer you want to add the new primitive to
 //- "item_list" is the treewidget, where you want the new primitive to be listet as an item

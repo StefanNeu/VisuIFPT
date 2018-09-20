@@ -50,9 +50,8 @@ vtkTimerCallback* vtkTimerCallback::New() {
 void vtkTimerCallback::Execute(vtkObject *caller, unsigned long eventId,
 	void * vtkNotUsed(callData)) {
 
-	vtkRenderWindowInteractor *iren = vtkRenderWindowInteractor::SafeDownCast(caller);
-	iren->GetRenderWindow()->Render();
-
+	//vtkRenderWindowInteractor *iren = vtkRenderWindowInteractor::SafeDownCast(caller);
+	
 }
 
 

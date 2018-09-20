@@ -28,14 +28,6 @@ public:
 
 	ActorCounter* mainWindow_ActorCounter;
 
-	/*
-	//static counters for naming and numbering our actos in the itemlist
-	static int pri_cubeCount;
-	static int pri_planeCount;
-	static int pri_sphereCount;
-	static int new_actorCount;
-	*/
-
 //Here we declare the public slot functions.
 public slots:
 
@@ -72,7 +64,12 @@ public slots:
 	//Process the closeEvent (clicking on the "x")
 	void closeEvent(QCloseEvent*);
 
+	//Checking the camera reposition option
 	void camReposition(bool);
+
+	//Updates components of the mainwindow periodically
+	void updateMainWindow();
+
 protected:
 
 	//This member manages connections between VTK and Qt objects
@@ -83,14 +80,11 @@ private:
 	//Default false and if true, camera always repositions when a new actor is added, so that every actor is visible
 	static bool auto_camReposition;
 
-	//Polydatamapper for our files or geo. primitives
-	vtkSmartPointer<vtkPolyDataMapper> polymapper;
-
 	//The interaction style of our window
 	vtk_InteractorMode* style;
 
-	//Public TreeWidgetItem that we assign when we open a context menu on a item of the actorlist
-	Q_actorTreeWidgetItem* actorlist_contextmenu_item;
+	//Public TreeWidgetItem that we assign when we click on an item of the item list
+	Q_actorTreeWidgetItem* actorlist_contextmenu_item = NULL;
 
 };
 

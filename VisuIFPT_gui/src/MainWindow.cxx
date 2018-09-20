@@ -24,6 +24,7 @@
 #include <vtkLight.h>
 #include <vtkLightCollection.h>
 
+
 //Initializing the automatic camera repositioning with false
 bool MainWindow::auto_camReposition = false;
 
@@ -54,6 +55,7 @@ MainWindow::MainWindow()
 	//allocate memory for the actorcounter of the mainwindow
 	mainWindow_ActorCounter = new ActorCounter;
 	
+
 	// Example for making an explicit light source that DOESN'T move with the camera/observer (like in reality)
 	/* 
 	Ren1->SetAutomaticLightCreation(0);
@@ -77,15 +79,9 @@ MainWindow::MainWindow()
 	//initialize interactor and add callback-object to update the viewer periodically
 	VTKViewer->GetRenderWindow()->GetInteractor()->Initialize();
 
-
-	// Periodically updating the Interactor, but commented because of bugs
-	/*
-	vtkSmartPointer<vtkTimerCallback> cb =
-		vtkSmartPointer<vtkTimerCallback>::New();
-	VTKViewer->GetRenderWindow()->GetInteractor()->AddObserver(vtkCommand::TimerEvent, cb);
-
+	//repeating timer makes the interactor send a signal peridodically, so we can update properly
 	VTKViewer->GetRenderWindow()->GetInteractor()->CreateRepeatingTimer(100);
-	*/
+	
 
 
 	//creating a OrientationMarkerWidget
@@ -117,18 +113,24 @@ MainWindow::MainWindow()
 	//open the Configurator-window
 	connect(actionOpen_Config, SIGNAL(triggered()), this, SLOT(openConfigurator()));
 	
-	
+	//connection for the automatic camera reposition
 	connect(checkBox_autoCamRepos, SIGNAL(clicked(bool)), this, SLOT(camReposition(bool)));
+
 
 	//this class is needed to manage Qt and VTK connections
 	Connections = vtkEventQtSlotConnect::New();
 
 	// update coords as we move through the window
 	Connections->Connect(VTKViewer->GetRenderWindow()->GetInteractor(),
-		vtkCommand::MouseMoveEvent,
+		vtkCommand::TimerEvent,
 		this,
 		SLOT(updateCoords(vtkObject*)));
 
+	//update transform data periodically
+	Connections->Connect(VTKViewer->GetRenderWindow()->GetInteractor(),
+		vtkCommand::TimerEvent,
+		this,
+		SLOT(updateMainWindow()));
 }
 
 MainWindow::~MainWindow()
@@ -136,7 +138,6 @@ MainWindow::~MainWindow()
 	//make sure to delete everything to avoid leaks!
 	Ren1->Delete();
 	Connections->Delete();
-	polymapper->Delete();
 	style->Delete();
 
 	// TODO: test if we have data leaks.
@@ -154,20 +155,20 @@ void MainWindow::displayTransformData(QTreeWidgetItem* item, int) {
 	double* scale = new double[3];
 
 	//we cast the QTreeWidgetItem into the derived class, so we can use a few extra functions
-	Q_actorTreeWidgetItem* actor_item = dynamic_cast<Q_actorTreeWidgetItem*>(item);
+	actorlist_contextmenu_item = dynamic_cast<Q_actorTreeWidgetItem*>(item);
 
 	//we need to find out, if we clicked on an item with an actor or assembly-reference
 	//(assemblies come from the configurator)
-	if (actor_item->getActorReference() == NULL) {
+	if (actorlist_contextmenu_item->getActorReference() == NULL) {
 
-		position = actor_item->getAssemblyReference()->GetPosition();
-		rotation = actor_item->getAssemblyReference()->GetOrientation();
+		position = actorlist_contextmenu_item->getAssemblyReference()->GetPosition();
+		rotation = actorlist_contextmenu_item->getAssemblyReference()->GetOrientation();
 
 	}
-	else if (actor_item->getAssemblyReference() == NULL) {
+	else if (actorlist_contextmenu_item->getAssemblyReference() == NULL) {
 
-		position = actor_item->getActorReference()->GetPosition();
-		rotation = actor_item->getActorReference()->GetOrientation();
+		position = actorlist_contextmenu_item->getActorReference()->GetPosition();
+		rotation = actorlist_contextmenu_item->getActorReference()->GetOrientation();
 	}
 	
 
@@ -382,5 +383,15 @@ void MainWindow::camReposition(bool ticked) {
 	}
 	else if (ticked == false) {
 		MainWindow::auto_camReposition = false;
+	}
+}
+
+//Slot for updating the transformdata periodically
+void MainWindow::updateMainWindow() {
+
+	if (actorlist_contextmenu_item != NULL) {
+
+		//we just use the other slot function again
+		displayTransformData(actorlist_contextmenu_item, 1);
 	}
 }
