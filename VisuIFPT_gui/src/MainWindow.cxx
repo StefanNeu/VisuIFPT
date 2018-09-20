@@ -26,10 +26,12 @@
 
 
 //Initialize static counters for items from the actors-list (just for naming purposes)
-int MainWindow::pri_planeCount = 0;
+/*int MainWindow::pri_planeCount = 0;
 int MainWindow::pri_cubeCount = 0;
 int MainWindow::pri_sphereCount = 0;
 int MainWindow::new_actorCount = 0;
+
+*/
 bool MainWindow::auto_camReposition = false;
 
 //#Constructor of our main window.
@@ -55,7 +57,8 @@ MainWindow::MainWindow()
 	Ren1 = vtkRenderer::New();
 	VTKViewer->GetRenderWindow()->AddRenderer(Ren1);
 
-
+	mainWindow_ActorCounter = new ActorCounter;
+	
 	// Example for making an explicit light source that DOESN'T move with the camera/observer (like in reality)
 	/* 
 	Ren1->SetAutomaticLightCreation(0);
@@ -239,72 +242,10 @@ void MainWindow::openFile_MainWindow() {
 }
 
 //Slot for spawning geometrical primitives.
-void MainWindow::spawnPrimitive(QAction* primitive) {					// TODO: maybe even outsource the vtkPolyData (which we create in every if-case equally)?
-
-	//the vtkPolyDataMapper that we fill with 
-	polymapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-	std::string item_name;
-
-	//check what primitive we want to create
-	if (primitive->text() == "Plane") {
-
-		//create vtkPlaneSource, set a few parameter, update it and 
-		//then connect the vtkPolyDataMapper with it
-		vtkSmartPointer<vtkPlaneSource> planeSource =
-			vtkSmartPointer<vtkPlaneSource>::New();
-		planeSource->SetCenter(0.0, 0.0, 0.0);
-		planeSource->SetNormal(1.0, 0.0, 1.0);
-		planeSource->Update();
-
-		vtkPolyData* plane = planeSource->GetOutput();
-		polymapper->SetInputData(plane);
-
-		//we want to give it a default name und numbering
-		MainWindow::pri_planeCount++;
-		item_name = "Plane" + std::to_string(MainWindow::pri_planeCount);
-
-	}
-	else if (primitive->text() == "Cube") {
-
-		//same procedure as above
-		vtkSmartPointer<vtkCubeSource> cubeSource =
-			vtkSmartPointer<vtkCubeSource>::New();
-		cubeSource->SetCenter(0.0, 0.0, 0.0);
-		cubeSource->Update();
-
-		vtkPolyData* cube = cubeSource->GetOutput();
-		polymapper->SetInputData(cube);
-
-		MainWindow::pri_cubeCount++;
-		item_name = "Cube" + std::to_string(MainWindow::pri_cubeCount);
+void MainWindow::spawnPrimitive(QAction* primitive) {				
 	
-	}
-	else if (primitive->text() == "Sphere") {
-
-		vtkSmartPointer<vtkSphereSource> sphereSource =
-			vtkSmartPointer<vtkSphereSource>::New();
-		sphereSource->SetThetaResolution(30);
-		sphereSource->SetPhiResolution(30);
-		sphereSource->SetCenter(0.0, 0.0, 0.0);
-		sphereSource->Update();
-
-		vtkPolyData* sphere = sphereSource->GetOutput();
-		polymapper->SetInputData(sphere);
-
-		MainWindow::pri_sphereCount++;
-		item_name = "Sphere" + std::to_string(MainWindow::pri_sphereCount);
-	}
-
-	//create a vtkActor, connect with the vtkPolyDataMapper and add to Ren1
-	vtkSmartPointer<vtkActor> actor =
-		vtkSmartPointer<vtkActor>::New();
-	
-	actor->SetMapper(polymapper);
-	Ren1->AddViewProp(actor);
-
-	//create a new item for our actors-list
-	Q_actorTreeWidgetItem* new_actor = new Q_actorTreeWidgetItem(treeWidget, actor, 1);
-	new_actor->setText(0, QString::fromStdString(item_name));
+	//we use a outsourced function in HelpClasses.cxx to spawn the primitives
+	spawnGeoPrimitives(primitive, Ren1, treeWidget, mainWindow_ActorCounter);
 
 	if (auto_camReposition == true) {
 		Ren1->ResetCamera();

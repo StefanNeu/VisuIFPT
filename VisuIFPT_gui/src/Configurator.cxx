@@ -44,9 +44,10 @@ Configurator::Configurator()
 	renwin->Delete();
 
 	//add a renderer
-	Actor_Renderer = vtkRenderer::New();
-	Actor_Viewer->GetRenderWindow()->AddRenderer(Actor_Renderer);
+	configuratorRen = vtkRenderer::New();
+	Actor_Viewer->GetRenderWindow()->AddRenderer(configuratorRen);
 
+	configurator_ActorCounter = new ActorCounter;
 
 	//add an InteractionMode (derivitive from InteractionStyleSwitch) and set default to trackball_camera
 	style = style->New();
@@ -91,7 +92,7 @@ Configurator::Configurator()
 Configurator::~Configurator()
 {
 	//make sure to delete everything!
-	Actor_Renderer->Delete();
+	configuratorRen->Delete();
 }
 
 
@@ -129,77 +130,7 @@ void Configurator::displayTransformData(QTreeWidgetItem* item, int) {
 // TODO: Actorliste einfügen?
 void Configurator::spawnPrimitive(QAction* primitive) {
 
-	//the vtkPolyDataMapper that we fill with 
-	vtkSmartPointer<vtkPolyDataMapper> polymapper = 
-		vtkSmartPointer<vtkPolyDataMapper>::New();
-	//std::string item_name;
-
-
-	//check what primitive we want to create
-	if (primitive->text() == "Plane") {
-
-		//create vtkPlaneSource, set a few parameter, update it and 
-		//then connect the vtkPolyDataMapper with it
-		vtkSmartPointer<vtkPlaneSource> planeSource =
-			vtkSmartPointer<vtkPlaneSource>::New();
-		planeSource->SetCenter(0.0, 0.0, 0.0);
-		planeSource->SetNormal(1.0, 0.0, 1.0);
-		planeSource->Update();
-
-		vtkPolyData* plane = planeSource->GetOutput();
-		polymapper->SetInputData(plane);
-
-		//we want to give it a default name und numbering
-		//MainWindow::pri_planeCount++;
-		//item_name = "Plane" + std::to_string(MainWindow::pri_planeCount);
-
-	}
-	else if (primitive->text() == "Cube") {
-
-		//same procedure as above
-		vtkSmartPointer<vtkCubeSource> cubeSource =
-			vtkSmartPointer<vtkCubeSource>::New();
-		cubeSource->SetCenter(0.0, 0.0, 0.0);
-		cubeSource->Update();
-
-		vtkPolyData* cube = cubeSource->GetOutput();
-		polymapper->SetInputData(cube);
-
-		//MainWindow::pri_cubeCount++;
-		//item_name = "Cube" + std::to_string(MainWindow::pri_cubeCount);
-
-	}
-	else if (primitive->text() == "Sphere") {
-
-		vtkSmartPointer<vtkSphereSource> sphereSource =
-			vtkSmartPointer<vtkSphereSource>::New();
-		sphereSource->SetThetaResolution(30);
-		sphereSource->SetPhiResolution(30);
-		sphereSource->SetCenter(0.0, 0.0, 0.0);
-		sphereSource->Update();
-
-		vtkPolyData* sphere = sphereSource->GetOutput();
-		polymapper->SetInputData(sphere);
-
-		//MainWindow::pri_sphereCount++;
-		//item_name = "Sphere" + std::to_string(MainWindow::pri_sphereCount);
-	}
-
-	//create a vtkActor, connect with the vtkPolyDataMapper and add to the renderer of the Configurator
-	vtkSmartPointer<vtkActor> actor =
-		vtkSmartPointer<vtkActor>::New();
-
-	actor->SetMapper(polymapper);
-	
-	//we want to render the single actors, so we can still work with every single one independently
-	Actor_Renderer->AddActor(actor);
-	
-	//add every new actor to the assembly
-	new_actor->AddPart((vtkProp3D*)actor);
-
-	//create a new item for our actors-list
-	//Q_actorTreeWidgetItem* new_actor = new Q_actorTreeWidgetItem(treeWidget, actor, 1);
-	//new_actor->setText(0, QString::fromStdString(item_name));
+	spawnGeoPrimitives(primitive, configuratorRen, NULL, configurator_ActorCounter);
 
 	Actor_Viewer->update();
 }
@@ -210,12 +141,12 @@ void Configurator::exportActor() {
 
 	//add the assembly to the main renderer from our main window and increment the new_actorCount
 	mainwindow->Ren1->AddActor(new_actor);
-	mainwindow->new_actorCount++;
+	mainwindow->mainWindow_ActorCounter->assemblyCount;
 
 	//create a new item in the actors-list from the main window
 	Q_actorTreeWidgetItem* new_item = new Q_actorTreeWidgetItem(mainwindow->treeWidget, new_actor, 1);
 
-	new_item->setText(0, QString::fromStdString("ConfigItem" + std::to_string(mainwindow->new_actorCount)));
+	new_item->setText(0, QString::fromStdString("ConfigItem" + std::to_string(mainwindow->mainWindow_ActorCounter->assemblyCount)));
 
 	close();
 }

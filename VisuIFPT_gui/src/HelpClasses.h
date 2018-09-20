@@ -42,8 +42,7 @@ private:
 };
 
 
-
-//Derived class to access protected members "JoystickOrCamera" and "CameraOrActor" of base class
+//Derived class to access protected members "JoystickOrCamera" and "CameraOrActor" of the base class
 class vtk_InteractorMode : public vtkInteractorStyleSwitch {
 
 public:
@@ -62,9 +61,32 @@ public:
 		void * vtkNotUsed(callData));
 };
 
+
+//Simple counter that can be used to count how many actors of a specific type
+//have been added to the scene. Helpful for default numbering/naming of items!
+class ActorCounter {
+public:
+	int pri_cubeCount = 0;
+	int pri_planeCount = 0;
+	int pri_sphereCount = 0;
+	int assemblyCount = 0;
+};
+
+//---------------- USEFUL FUNCTIONS -------------------------
+
+
 //Function for opening 3D-files. 
-//- renderer is the renderer you want to add the new actor to
-//- parent_widget is the parent of the (Windows) File Dialog.. you can use the "this" pointer of the window
-//- item_list is the treewidget, where you want the actor to be listed as an item
+//- "renderer" is the renderer you want to add the new actor to
+//- "parent_widget" is the parent of the (Windows) File Dialog.. you can use the "this" pointer of the window
+//- "item_list" is the treewidget, where you want the actor to be listed as an item
 void openFile(vtkRenderer* renderer, QWidget* parent_widget, QTreeWidget* item_list);
+
+//Function for spawning geometrical primitives.
+//- "primitive" the QAction that the user pressed on.. important for the slot-principle of Qt!
+//- "renderer" is the renderer you want to add the new primitive to
+//- "item_list" is the treewidget, where you want the new primitive to be listet as an item
+//- "primitive_counter" is an ActorCounter of your scene
+void spawnGeoPrimitives(QAction* primitive, vtkRenderer* renderer, QTreeWidget* item_list, ActorCounter* primitive_counter);
+
+
 #endif

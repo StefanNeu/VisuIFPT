@@ -26,11 +26,15 @@ public:
 	//currently our only renderer of the scene
 	vtkRenderer * Ren1;
 
+	ActorCounter* mainWindow_ActorCounter;
+
+	/*
 	//static counters for naming and numbering our actos in the itemlist
 	static int pri_cubeCount;
 	static int pri_planeCount;
 	static int pri_sphereCount;
 	static int new_actorCount;
+	*/
 
 //Here we declare the public slot functions.
 public slots:

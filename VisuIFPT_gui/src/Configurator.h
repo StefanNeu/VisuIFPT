@@ -28,6 +28,8 @@ public:
 	//The reference to the MainWindow, so we can access some members of it
 	MainWindow* mainwindow;
 
+	ActorCounter* configurator_ActorCounter;
+
 public slots:
 
 	//Display the transform-data of the referenced vtkActor of this item
@@ -48,7 +50,7 @@ private:
 	vtk_InteractorMode * style;
 
 	//Renderer of the scene
-	vtkRenderer* Actor_Renderer;
+	vtkRenderer* configuratorRen;
 
 	//the actor we are assembling in the configurator and that we want to add to the mainwindow
 	vtkAssembly* new_actor;
