@@ -49,7 +49,7 @@ class vtk_InteractorMode : public vtkInteractorStyleTrackballCamera {
 
 public:
 	static vtk_InteractorMode * New();
-	vtkTypeMacro(vtk_InteractorMode, vtkInteractorStyleTrackballTest);
+	vtkTypeMacro(vtk_InteractorMode, vtkInteractorStyleTrackballCamera);
 
 	//Return mode of vtkInteractor
 	void getMode(std::string& actor_or_camera, std::string& joystick_or_trackball);
