@@ -52,7 +52,7 @@ Configurator::Configurator()
 
 	//add an InteractionMode (derivitive from InteractionStyleSwitch) and set default to trackball_camera
 	style = style->New();
-	style->SetCurrentStyleToTrackballCamera();
+	//style->SetCurrentStyleToTrackballCamera();
 	ConfiguratorViewer->GetRenderWindow()->GetInteractor()->SetInteractorStyle(style);
 
 

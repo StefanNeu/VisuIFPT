@@ -6,6 +6,8 @@
 #include <vtkInteractorStyleSwitch.h>
 #include <vtkCommand.h>
 #include <qtreewidget.h>
+#include <vtkInteractorStyleTrackballCamera.h>
+#include <vtkObjectFactory.h>
 
 #include <string>
 
@@ -43,15 +45,24 @@ private:
 
 
 //Derived class to access protected members "JoystickOrCamera" and "CameraOrActor" of the base class
-class vtk_InteractorMode : public vtkInteractorStyleSwitch {
+class vtk_InteractorMode : public vtkInteractorStyleTrackballCamera {
 
 public:
-	vtk_InteractorMode * New();
+	static vtk_InteractorMode * New();
+	vtkTypeMacro(vtk_InteractorMode, vtkInteractorStyleTrackballActor);
 
 	//Return mode of vtkInteractor
 	void getMode(std::string& actor_or_camera, std::string& joystick_or_trackball);
-};
 
+	vtk_InteractorMode();
+	~vtk_InteractorMode();
+
+	virtual void OnLeftButtonDown();
+
+private:
+	vtkActor * LastPickedActor;
+	vtkProperty *LastPickedProperty;
+};
 
 //Callback class used for updating the QVTKWidget periodically
 class vtkTimerCallback : public vtkCommand {

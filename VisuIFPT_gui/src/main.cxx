@@ -26,6 +26,9 @@ http://www.trolltech.com/products/3rdparty/vtksupport.html
 
 #include <MainWindow.h>				//for creating our main window
 
+//needed for vtk_InteractorMode.. look in examples for CXX/Interaction/Picking
+vtkStandardNewMacro(vtk_InteractorMode);
+
 //MAIN entry point for the program!
 int main(int argc, char** argv)
 {

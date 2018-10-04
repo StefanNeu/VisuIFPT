@@ -24,10 +24,15 @@
 #include <vtkLight.h>
 #include <vtkLightCollection.h>
 
+//#include <vtkInteractorStyleTrackballCamera.h>
+//#include <vtkInteractorStyleTrackball.h>
+//#include <vtkProperty.h>
+//#include <vtkPropPicker.h>
+
+
 
 //Initializing the automatic camera repositioning with false
 bool MainWindow::auto_camReposition = false;
-
 
 //Constructor of our main window.
 MainWindow::MainWindow()
@@ -71,13 +76,23 @@ MainWindow::MainWindow()
 	
 
 	//add an InteractionMode (derivitive from InteractionStyleSwitch) and set default to trackball_camera
-	style = style->New();
+	/*style = style->New();
 	style->SetCurrentStyleToTrackballCamera();
+	style->SetDefaultRenderer(Ren1);
 	VTKViewer->GetRenderWindow()->GetInteractor()->SetInteractorStyle(style);
+	*/
 
+	// Set the custom type to use for interaction.
+	style = style->New();
+	style->SetDefaultRenderer(Ren1);
+	VTKViewer->GetRenderWindow()->GetInteractor()->SetInteractorStyle(style);
+	
+	
 
 	//initialize interactor and add callback-object to update the viewer periodically
+	VTKViewer->GetRenderWindow()->Render();
 	VTKViewer->GetRenderWindow()->GetInteractor()->Initialize();
+	VTKViewer->GetRenderWindow()->GetInteractor()->Start();
 
 	//repeating timer makes the interactor send a signal peridodically, so we can update properly
 	VTKViewer->GetRenderWindow()->GetInteractor()->CreateRepeatingTimer(100);
@@ -138,7 +153,7 @@ MainWindow::~MainWindow()
 	//make sure to delete everything to avoid leaks!
 	Ren1->Delete();
 	Connections->Delete();
-	style->Delete();
+	//style->Delete();
 
 	// TODO: test if we have data leaks.
 	delete actorlist_contextmenu_item;
@@ -217,7 +232,7 @@ void MainWindow::updateCoords(vtkObject* obj)
 
 	std::string ac_or_cam, joy_or_tra;
 	//we want to get the mode of our WindowInteractor
-	style->getMode(ac_or_cam, joy_or_tra);
+	//style->getMode(ac_or_cam, joy_or_tra);
 
 	//update label
 	QString str;
@@ -393,5 +408,6 @@ void MainWindow::updateMainWindow() {
 
 		//we just use the other slot function again
 		displayTransformData(actorlist_contextmenu_item, 1);
+		
 	}
 }

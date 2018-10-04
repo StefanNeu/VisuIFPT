@@ -5,24 +5,20 @@
 #include <vtkRenderWindowInteractor.h>		//VTK usage
 #include <vtkRenderWindow.h>
 #include <vtkActor.h>
+#include <vtkProperty.h>
 #include <vtkRenderer.h>
 #include <vtkSmartPointer.h>
 #include <vtkPlaneSource.h>
 #include <vtkCubeSource.h>
 #include <vtkSphereSource.h>
+#include <vtkPropPicker.h>
 #include <qfiledialog.h>
 #include <qaction.h>
 
 #include <string>
 
-
-//Simple constructor for derived class we need
-vtk_InteractorMode* vtk_InteractorMode::New() {
-	return new vtk_InteractorMode();
-}
-
 //Put in two strings and function puts out current interactorstyles
-void vtk_InteractorMode::getMode(std::string &cam_or_ac, std::string &joy_or_track) {
+/*void vtk_InteractorMode::getMode(std::string &cam_or_ac, std::string &joy_or_track) {
 
 	//we access the protected variables of the base class
 	if (JoystickOrTrackball == 0) {						
@@ -39,7 +35,48 @@ void vtk_InteractorMode::getMode(std::string &cam_or_ac, std::string &joy_or_tra
 		cam_or_ac = "Actor";
 	}
 }
+*/
+vtk_InteractorMode::vtk_InteractorMode()
+{
+	LastPickedActor = NULL;
+	LastPickedProperty = vtkProperty::New();
+}
 
+vtk_InteractorMode::~vtk_InteractorMode()
+{
+	LastPickedProperty->Delete();
+}
+
+void vtk_InteractorMode::OnLeftButtonDown() {
+	
+	int* clickPos = this->GetInteractor()->GetEventPosition();
+
+	// Pick from this location.
+	vtkSmartPointer<vtkPropPicker>  picker =
+		vtkSmartPointer<vtkPropPicker>::New();
+
+	picker->Pick(clickPos[0], clickPos[1], 0, this->GetDefaultRenderer());
+
+	// If we picked something before, reset its property
+	if (this->LastPickedActor)
+	{
+		this->LastPickedActor->GetProperty()->DeepCopy(this->LastPickedProperty);
+	}
+	this->LastPickedActor = picker->GetActor();
+	if (this->LastPickedActor)
+	{
+		// Save the property of the picked actor so that we can
+		// restore it next time
+		this->LastPickedProperty->DeepCopy(this->LastPickedActor->GetProperty());
+		// Highlight the picked actor by changing its properties
+		this->LastPickedActor->GetProperty()->SetColor(1.0, 0.0, 0.0);
+		this->LastPickedActor->GetProperty()->SetDiffuse(1.0);
+		this->LastPickedActor->GetProperty()->SetSpecular(0.0);
+	}
+
+	// Forward events
+	vtkInteractorStyleTrackballCamera::OnLeftButtonDown();
+}
 
 //Simple constructor
 vtkTimerCallback* vtkTimerCallback::New() {
@@ -76,7 +113,7 @@ void openFile(vtkRenderer* renderer, QWidget* parent_widget, QTreeWidget* item_l
 		//dialog->exec();
 
 		//open file and read content into the polymapper
-		readPLY_p(polymapper, filename);
+		readPLY_s(polymapper, filename);
 
 	}
 	else if (filename.find(".stl") != std::string::npos) {
