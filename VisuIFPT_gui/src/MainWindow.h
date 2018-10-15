@@ -70,6 +70,8 @@ public slots:
 	//Updates components of the mainwindow periodically
 	void updateMainWindow();
 
+	void openYAML();
+
 protected:
 
 	//This member manages connections between VTK and Qt objects

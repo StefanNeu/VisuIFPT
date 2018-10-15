@@ -24,6 +24,13 @@
 #include <vtkLight.h>
 #include <vtkLightCollection.h>
 
+#include <yaml-cpp\yaml.h>
+#include <assert.h>
+#include <vector>
+#include <vtkBoundingBox.h>
+#include <vtkTransform.h>
+#include <vtkMatrix4x4.h>
+
 //#include <vtkInteractorStyleTrackballCamera.h>
 //#include <vtkInteractorStyleTrackball.h>
 //#include <vtkProperty.h>
@@ -130,6 +137,8 @@ MainWindow::MainWindow()
 	
 	//connection for the automatic camera reposition
 	connect(checkBox_autoCamRepos, SIGNAL(clicked(bool)), this, SLOT(camReposition(bool)));
+
+	connect(actionOpen_YAML_Configuration, SIGNAL(triggered()), this, SLOT(openYAML()));
 
 
 	//this class is needed to manage Qt and VTK connections
@@ -409,5 +418,63 @@ void MainWindow::updateMainWindow() {
 		//we just use the other slot function again
 		displayTransformData(actorlist_contextmenu_item, 1);
 		
+	}
+}
+
+void MainWindow::openYAML() {
+
+	QString yaml_filename = QFileDialog::getOpenFileName(this, "Open YAML configuration", "C:/", "YAML files (*.yml *.yaml)");
+	std::string filename = yaml_filename.toStdString();
+
+	try {
+		std::vector<YAML::Node> node_collection = YAML::LoadAllFromFile(filename);
+
+		if ( !( node_collection[0].IsNull() ) ) {
+
+			YAML::Node node1 = node_collection[0];
+			YAML::Emitter yaml_emit;
+			yaml_emit << node1;
+			cout << yaml_emit.c_str();
+			
+			vtkSmartPointer<vtkActor> new_boundBox =
+				vtkSmartPointer<vtkActor>::New();
+
+			Q_actorTreeWidgetItem* new_actor = new Q_actorTreeWidgetItem(mainWindow_actorList, new_boundBox, 1);
+			new_actor->setText(0, QString::fromStdString(node1["name"].as<std::string>()));
+
+
+			double* transform_data = new double[16];
+			for (int i = 0; i < node1["transformation"].size(); i++) {
+				transform_data[i] = node1["transformation"][i].as<double>();
+			}
+
+
+			double* geometry_origin = new double[16];
+			for (int i = 0; i < node1["geometry"]["origin"].size(); i++) {
+				geometry_origin[i] = node1["geometry"]["origin"][i].as<double>();
+			}
+			
+			vtkBoundingBox* bounding_box = new vtkBoundingBox;
+			bounding_box->
+			vtkSmartPointer<vtkMatrix4x4> transform_matrix =
+				vtkSmartPointer<vtkMatrix4x4>::New();
+			transform_matrix->DeepCopy(transform_data);
+			transform_matrix->Transpose();
+			
+			vtkSmartPointer<vtkTransform> bound_transform =
+				vtkSmartPointer<vtkTransform>::New();
+			bound_transform->SetMatrix(transform_matrix);
+			
+			new_boundBox->SetUserTransform(bound_transform);
+			
+
+			//bounding_box->SetBounds()
+
+		}
+		
+
+	}
+	catch (const YAML::Exception& e) {
+		cout << e.what() << endl;
 	}
 }

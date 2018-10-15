@@ -26,7 +26,8 @@ set( MOC_Hdrs MainWindow.h include/Reader.h HelpClasses.h Configurator.h openPLY
 
 set( UIs MainWindow.ui openPLY_dialog.ui Configurator.ui)
 
-
+set( YAML-CPP_LIB "C:\\YAML\\bin\\Debug\\yaml-cpp.lib")
+set( VTK_DIR "C:\\VTK\\build")
 
 # Use the include path and library for Qt that is used by VTK.
 include_directories(
@@ -49,4 +50,6 @@ add_executable(VisuIFPT_gui
 
 qt5_use_modules(VisuIFPT_gui Core Gui Widgets)
 
-target_link_libraries(VisuIFPT_gui ${VTK_LIBRARIES})
+target_link_libraries(VisuIFPT_gui ${VTK_LIBRARIES} ${YAML-CPP_LIB})
+
+target_include_directories(VisuIFPT_gui PUBLIC "C:\\YAML\\src\\include")

@@ -139,7 +139,7 @@ void openFile(vtkRenderer* renderer, QWidget* parent_widget, QTreeWidget* item_l
 	//new TreeWidgetItem for the actors_list
 	Q_actorTreeWidgetItem* new_actor = new Q_actorTreeWidgetItem(item_list, actor, 1);
 
-	new_actor->setText(0, QString::fromStdString(s_file + s_ext)); //TODO: numbering when you open same file more than one time
+	new_actor->setText(0, QString::fromStdString(s_file + s_ext)); //OstTODO: numbering when you open same file more than one time
 
 }
 
