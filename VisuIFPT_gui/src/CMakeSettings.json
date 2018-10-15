@@ -14,7 +14,7 @@
       "variables": [
         {
           "name": "VTK_DIR",
-          "value": "C:\\VTK\\bin"
+          "value": "C:\\VTK\\build"
         }
       ]
     },
@@ -27,7 +27,13 @@
       "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
-      "ctestCommandArgs": ""
+      "ctestCommandArgs": "",
+      "variables": [
+        {
+          "name": "VTK_DIR",
+          "value": "C:\\VTK\\build"
+        }
+      ]
     }
   ]
 }

@@ -27,13 +27,16 @@
 #include <yaml-cpp\yaml.h>
 #include <assert.h>
 #include <vector>
-#include <vtkBoundingBox.h>
+#include <vtkOutlineFilter.h>
 #include <vtkTransform.h>
 #include <vtkMatrix4x4.h>
+#include <vtkCubeSource.h>
+
+#include <vtkExtractEdges.h>
 
 //#include <vtkInteractorStyleTrackballCamera.h>
 //#include <vtkInteractorStyleTrackball.h>
-//#include <vtkProperty.h>
+#include <vtkProperty.h>
 //#include <vtkPropPicker.h>
 
 
@@ -69,17 +72,15 @@ MainWindow::MainWindow()
 	
 
 	// Example for making an explicit light source that DOESN'T move with the camera/observer (like in reality)
-	/* 
+	
 	Ren1->SetAutomaticLightCreation(0);
 	
-	vtkSmartPointer<vtkLight> lightKit =
-		vtkSmartPointer<vtkLight>::New();
-	lightKit->SetPosition(0.0, 2.0, 0.0);
-	lightKit->SetLightTypeToSceneLight();
-	lightKit->SetFocalPoint(0.0, 0.0, 0.0);
-	lightKit->SetAmbientColor(0.0, 1.0, 0.0);
-	Ren1->AddLight(lightKit);
-	*/
+	vtkSmartPointer<vtkLightKit> light =
+		vtkSmartPointer<vtkLightKit>::New();
+	light->AddLightsToRenderer(Ren1);
+	light->Update();
+
+
 	
 
 	//add an InteractionMode (derivitive from InteractionStyleSwitch) and set default to trackball_camera
@@ -300,6 +301,7 @@ void MainWindow::deleteActor() {
 	}
 	
 	delete actorlist_contextmenu_item;
+	actorlist_contextmenu_item = NULL;
 
 	VTKViewer->update();
 }
@@ -431,45 +433,62 @@ void MainWindow::openYAML() {
 
 		if ( !( node_collection[0].IsNull() ) ) {
 
-			YAML::Node node1 = node_collection[0];
-			YAML::Emitter yaml_emit;
-			yaml_emit << node1;
-			cout << yaml_emit.c_str();
-			
-			vtkSmartPointer<vtkActor> new_boundBox =
-				vtkSmartPointer<vtkActor>::New();
+			for (int i = 0; i < node_collection.size(); i++) {
 
-			Q_actorTreeWidgetItem* new_actor = new Q_actorTreeWidgetItem(mainWindow_actorList, new_boundBox, 1);
-			new_actor->setText(0, QString::fromStdString(node1["name"].as<std::string>()));
+				YAML::Node node1 = node_collection[i];
+				YAML::Emitter yaml_emit;
+				yaml_emit << node1;
+
+				vtkSmartPointer<vtkActor> boundBox_actor =
+					vtkSmartPointer<vtkActor>::New();
+
+				Q_actorTreeWidgetItem* new_actor = new Q_actorTreeWidgetItem(mainWindow_actorList, boundBox_actor, 1);
+				new_actor->setText(0, QString::fromStdString(node1["name"].as<std::string>()));
 
 
-			double* transform_data = new double[16];
-			for (int i = 0; i < node1["transformation"].size(); i++) {
-				transform_data[i] = node1["transformation"][i].as<double>();
+				double* transform_data = new double[node1["transformation"].size()];
+				for (int i = 0; i < node1["transformation"].size(); i++) {
+					transform_data[i] = node1["transformation"][i].as<double>();
+				}
+
+				//TODO: change size of array to the real size of the sequence, so we dont access other storage is sequence is bigger than 16
+				double* geometry_origin = new double[node1["geometry"]["origin"].size()];
+				for (int i = 0; i < node1["geometry"]["origin"].size(); i++) {
+					geometry_origin[i] = node1["geometry"]["origin"][i].as<double>();
+				}
+
+				double* geometry_dimensions = new double[node1["geometry"]["extension"].size()];
+				for (int i = 0; i < node1["geometry"]["extension"].size(); i++) {
+					geometry_dimensions[i] = node1["geometry"]["extension"][i].as<double>();
+				}
+
+
+				vtkSmartPointer<vtkCubeSource> bounding_box =
+					vtkSmartPointer<vtkCubeSource>::New();
+				bounding_box->SetBounds(0.0, geometry_dimensions[0], 0.0, geometry_dimensions[1], 0.0, geometry_dimensions[2]);
+				bounding_box->SetCenter(0.0, 0.0, 0.0);
+				bounding_box->Update();
+
+				vtkSmartPointer<vtkPolyDataMapper> bounding_mapper =
+					vtkSmartPointer<vtkPolyDataMapper>::New();
+				bounding_mapper->SetInputConnection(bounding_box->GetOutputPort());
+
+				vtkSmartPointer<vtkMatrix4x4> transform_matrix =
+					vtkSmartPointer<vtkMatrix4x4>::New();
+				transform_matrix->DeepCopy(transform_data);
+				transform_matrix->Transpose();
+
+				vtkSmartPointer<vtkTransform> bound_transform =
+					vtkSmartPointer<vtkTransform>::New();
+				bound_transform->SetMatrix(transform_matrix);
+				boundBox_actor->SetUserTransform(bound_transform);
+
+				boundBox_actor->SetMapper(bounding_mapper);
+				boundBox_actor->GetProperty()->SetRepresentationToWireframe();
+				Ren1->AddActor(boundBox_actor);
+				
+
 			}
-
-
-			double* geometry_origin = new double[16];
-			for (int i = 0; i < node1["geometry"]["origin"].size(); i++) {
-				geometry_origin[i] = node1["geometry"]["origin"][i].as<double>();
-			}
-			
-			vtkBoundingBox* bounding_box = new vtkBoundingBox;
-			bounding_box->
-			vtkSmartPointer<vtkMatrix4x4> transform_matrix =
-				vtkSmartPointer<vtkMatrix4x4>::New();
-			transform_matrix->DeepCopy(transform_data);
-			transform_matrix->Transpose();
-			
-			vtkSmartPointer<vtkTransform> bound_transform =
-				vtkSmartPointer<vtkTransform>::New();
-			bound_transform->SetMatrix(transform_matrix);
-			
-			new_boundBox->SetUserTransform(bound_transform);
-			
-
-			//bounding_box->SetBounds()
-
 		}
 		
 
