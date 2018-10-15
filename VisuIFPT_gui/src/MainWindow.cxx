@@ -31,6 +31,7 @@
 #include <vtkTransform.h>
 #include <vtkMatrix4x4.h>
 #include <vtkCubeSource.h>
+#include <vtkTransformPolyDataFilter.h>
 
 #include <vtkExtractEdges.h>
 
@@ -469,9 +470,8 @@ void MainWindow::openYAML() {
 				bounding_box->SetCenter(0.0, 0.0, 0.0);
 				bounding_box->Update();
 
-				vtkSmartPointer<vtkPolyDataMapper> bounding_mapper =
-					vtkSmartPointer<vtkPolyDataMapper>::New();
-				bounding_mapper->SetInputConnection(bounding_box->GetOutputPort());
+			
+				
 
 				vtkSmartPointer<vtkMatrix4x4> transform_matrix =
 					vtkSmartPointer<vtkMatrix4x4>::New();
@@ -481,11 +481,23 @@ void MainWindow::openYAML() {
 				vtkSmartPointer<vtkTransform> bound_transform =
 					vtkSmartPointer<vtkTransform>::New();
 				bound_transform->SetMatrix(transform_matrix);
-				boundBox_actor->SetUserTransform(bound_transform);
+				
+				vtkSmartPointer<vtkTransformPolyDataFilter> transformFilter =
+					vtkSmartPointer<vtkTransformPolyDataFilter>::New();
+				transformFilter->SetInputConnection(bounding_box->GetOutputPort());
+				transformFilter->SetTransform(bound_transform);
+				transformFilter->Update();
+
+				vtkSmartPointer<vtkPolyDataMapper> bounding_mapper =
+					vtkSmartPointer<vtkPolyDataMapper>::New();
+				bounding_mapper->SetInputConnection(transformFilter->GetOutputPort());
 
 				boundBox_actor->SetMapper(bounding_mapper);
 				boundBox_actor->GetProperty()->SetRepresentationToWireframe();
 				Ren1->AddActor(boundBox_actor);
+				
+
+				
 				
 
 			}
