@@ -32,6 +32,7 @@
 #include <vtkMatrix4x4.h>
 #include <vtkCubeSource.h>
 #include <vtkTransformPolyDataFilter.h>
+#include <qtreewidget.h>
 
 #include <vtkExtractEdges.h>
 
@@ -104,7 +105,7 @@ MainWindow::MainWindow()
 	VTKViewer->GetRenderWindow()->GetInteractor()->Start();
 
 	//repeating timer makes the interactor send a signal peridodically, so we can update properly
-	VTKViewer->GetRenderWindow()->GetInteractor()->CreateRepeatingTimer(100);
+	//VTKViewer->GetRenderWindow()->GetInteractor()->CreateRepeatingTimer(100);
 	
 
 
@@ -146,12 +147,6 @@ MainWindow::MainWindow()
 	//this class is needed to manage Qt and VTK connections
 	Connections = vtkEventQtSlotConnect::New();
 
-	// update coords as we move through the window
-	Connections->Connect(VTKViewer->GetRenderWindow()->GetInteractor(),
-		vtkCommand::TimerEvent,
-		this,
-		SLOT(updateCoords(vtkObject*)));
-
 	//update transform data periodically
 	Connections->Connect(VTKViewer->GetRenderWindow()->GetInteractor(),
 		vtkCommand::TimerEvent,
@@ -176,79 +171,72 @@ MainWindow::~MainWindow()
 //Slot for transform-data.
 void MainWindow::displayTransformData(QTreeWidgetItem* item, int) {
 
-	double* position = new double[3];
-	double* rotation = new double[3];
+	//we want to clear the list everytime we display all (and maybe sometimes different) property of actors
+	property_list->clear();
+
+	//allocate memory
+	double* location_data = new double[3];
+	double* rotation_data = new double[3];
 	double* scale = new double[3];
 
 	//we cast the QTreeWidgetItem into the derived class, so we can use a few extra functions
 	actorlist_contextmenu_item = dynamic_cast<Q_actorTreeWidgetItem*>(item);
 
+
+	//we need to access the vtkTransform of the actor/assembly to get the true position and rotation of the actorS
+	vtkSmartPointer<vtkTransform> transformation =
+		vtkSmartPointer<vtkTransform>::New();
+
 	//we need to find out, if we clicked on an item with an actor or assembly-reference
 	//(assemblies come from the configurator)
 	if (actorlist_contextmenu_item->getActorReference() == NULL) {
-
-		position = actorlist_contextmenu_item->getAssemblyReference()->GetPosition();
-		rotation = actorlist_contextmenu_item->getAssemblyReference()->GetOrientation();
-
+		transformation->SetMatrix(actorlist_contextmenu_item->getAssemblyReference()->GetMatrix());
 	}
 	else if (actorlist_contextmenu_item->getAssemblyReference() == NULL) {
-
-		position = actorlist_contextmenu_item->getActorReference()->GetPosition();
-		rotation = actorlist_contextmenu_item->getActorReference()->GetOrientation();
+		transformation->SetMatrix(actorlist_contextmenu_item->getActorReference()->GetMatrix());
 	}
+
+	transformation->GetPosition(location_data);
+	transformation->GetOrientation(rotation_data);
 	
 
 	//------------------------ POSITION ------------------------------
 	//we need to cut off a little bit, off the too long double string
-	std::string x_stringPOS = std::to_string(position[0]);
+	std::string x_stringPOS = std::to_string(location_data[0]);
 	x_stringPOS = x_stringPOS.substr(0, x_stringPOS.size() - 4);
 
-	std::string y_stringPOS = std::to_string(position[1]);
+	std::string y_stringPOS = std::to_string(location_data[1]);
 	y_stringPOS = y_stringPOS.substr(0, y_stringPOS.size() - 4);
 
-	std::string z_stringPOS = std::to_string(position[2]);
+	std::string z_stringPOS = std::to_string(location_data[2]);
 	z_stringPOS = z_stringPOS.substr(0, z_stringPOS.size() - 4);
 
-	//and set the text of the QLineEdit-objects
-	x_loc->setText(QString(x_stringPOS.c_str()));
-	y_loc->setText(QString(y_stringPOS.c_str()));
-	z_loc->setText(QString(z_stringPOS.c_str()));
+	//we create a parent item and give it the children "location" and "rotation" with the corresponding data
+	QTreeWidgetItem* transform = new QTreeWidgetItem(property_list, 1);
+	transform->setText(0, QString::fromStdString("Transform Data"));
+	transform->setExpanded(true);
+
+	QTreeWidgetItem* location = new QTreeWidgetItem(transform, 1);
+	location->setText(0, QString::fromStdString("Location"));
+	location->setText(1, QString::fromStdString("x=" + x_stringPOS + "     y=" + y_stringPOS + "     z=" + z_stringPOS));
 
 
 	//---------------------- ROTATION ----------------------------------
 	//same procedure as above
-	std::string x_stringROT = std::to_string(rotation[0]);
+	std::string x_stringROT = std::to_string(rotation_data[0]);
 	x_stringROT = x_stringROT.substr(0, x_stringROT.size() - 4);
 
-	std::string y_stringROT = std::to_string(rotation[1]);
+	std::string y_stringROT = std::to_string(rotation_data[1]);
 	y_stringROT = y_stringROT.substr(0, y_stringROT.size() - 4);
 
-	std::string z_stringROT = std::to_string(rotation[2]);
+	std::string z_stringROT = std::to_string(rotation_data[2]);
 	z_stringROT = z_stringROT.substr(0, z_stringROT.size() - 4);
 
-	x_rot->setText(QString(x_stringROT.c_str()));
-	y_rot->setText(QString(y_stringROT.c_str()));
-	z_rot->setText(QString(z_stringROT.c_str()));
-}
 
-//Slot for updating mouse-coordinates.
-void MainWindow::updateCoords(vtkObject* obj)
-{
-	//get interactor
-	vtkRenderWindowInteractor* iren = vtkRenderWindowInteractor::SafeDownCast(obj);
+	QTreeWidgetItem* rotation = new QTreeWidgetItem(transform, 1);
+	rotation->setText(0, QString::fromStdString("Rotation"));
+	rotation->setText(1, QString::fromStdString("x=" + x_stringROT + "     y=" + y_stringROT + "     z=" + z_stringROT));
 
-	//get event position
-	int event_pos[2];
-	iren->GetEventPosition(event_pos);
-
-	std::string ac_or_cam, joy_or_tra;
-	//we want to get the mode of our WindowInteractor
-	//style->getMode(ac_or_cam, joy_or_tra);
-
-	//update label
-	QString str;
-	str.sprintf("Mode:  %s     %s                      x=%d : y=%d", ac_or_cam.c_str(), joy_or_tra.c_str(), event_pos[0], event_pos[1]);
-	coordinates->setText(str);
 }
 
 //Slot for opening 3D-files.
@@ -388,6 +376,7 @@ void MainWindow::openConfigurator() {
 //Slot for safety warning when trying to close this window
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+	/*
 	QMessageBox::StandardButton resBtn = QMessageBox::question(this, QString("VisuIFPT"),
 		tr("Are you sure?\n"),
 		QMessageBox::No | QMessageBox::Yes,
@@ -400,6 +389,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	else {
 		event->accept();
 	}
+	*/
 }
 
 //Slot for controlling the option of automatic camera reposition
@@ -419,7 +409,7 @@ void MainWindow::updateMainWindow() {
 	if (actorlist_contextmenu_item != NULL) {
 
 		//we just use the other slot function again
-		displayTransformData(actorlist_contextmenu_item, 1);
+		//displayTransformData(actorlist_contextmenu_item, 1);
 		
 	}
 }
@@ -481,17 +471,13 @@ void MainWindow::openYAML() {
 				vtkSmartPointer<vtkTransform> bound_transform =
 					vtkSmartPointer<vtkTransform>::New();
 				bound_transform->SetMatrix(transform_matrix);
-				
-				vtkSmartPointer<vtkTransformPolyDataFilter> transformFilter =
-					vtkSmartPointer<vtkTransformPolyDataFilter>::New();
-				transformFilter->SetInputConnection(bounding_box->GetOutputPort());
-				transformFilter->SetTransform(bound_transform);
-				transformFilter->Update();
+			
 
 				vtkSmartPointer<vtkPolyDataMapper> bounding_mapper =
 					vtkSmartPointer<vtkPolyDataMapper>::New();
-				bounding_mapper->SetInputConnection(transformFilter->GetOutputPort());
+				bounding_mapper->SetInputConnection(bounding_box->GetOutputPort());
 
+				boundBox_actor->SetUserTransform(bound_transform);
 				boundBox_actor->SetMapper(bounding_mapper);
 				boundBox_actor->GetProperty()->SetRepresentationToWireframe();
 				Ren1->AddActor(boundBox_actor);

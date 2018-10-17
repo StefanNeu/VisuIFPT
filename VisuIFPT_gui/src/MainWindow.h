@@ -31,9 +31,6 @@ public:
 //Here we declare the public slot functions.
 public slots:
 
-	//Update coordinates of mouse
-	void updateCoords(vtkObject*);
-
 	//Open 3D-files
 	void openFile_MainWindow();
 

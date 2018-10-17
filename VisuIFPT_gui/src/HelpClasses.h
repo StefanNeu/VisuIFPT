@@ -11,6 +11,8 @@
 
 #include <string>
 
+
+
 //Derived class of QTreeWidgetItem, with private reference to the actor/assembly of the item
 class Q_actorTreeWidgetItem : public QTreeWidgetItem {
 public:
@@ -62,17 +64,6 @@ public:
 private:
 	vtkActor * LastPickedActor;
 	vtkProperty *LastPickedProperty;
-};
-
-//Callback class used for updating the QVTKWidget periodically
-class vtkTimerCallback : public vtkCommand {
-public:
-
-	static vtkTimerCallback* New();
-
-	virtual void Execute(vtkObject *caller, unsigned long eventId,
-		void * vtkNotUsed(callData));
-
 };
 
 

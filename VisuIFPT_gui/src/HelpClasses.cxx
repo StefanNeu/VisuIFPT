@@ -47,6 +47,7 @@ vtk_InteractorMode::~vtk_InteractorMode()
 	LastPickedProperty->Delete();
 }
 
+
 void vtk_InteractorMode::OnLeftButtonDown() {
 	
 	int* clickPos = this->GetInteractor()->GetEventPosition();
@@ -77,20 +78,6 @@ void vtk_InteractorMode::OnLeftButtonDown() {
 	// Forward events
 	vtkInteractorStyleTrackballCamera::OnLeftButtonDown();
 }
-
-//Simple constructor
-vtkTimerCallback* vtkTimerCallback::New() {
-	return new vtkTimerCallback();
-}
-
-//Important function! Execute() gets called, when the observed objects sends a signal.
-void vtkTimerCallback::Execute(vtkObject *caller, unsigned long eventId,
-	void * vtkNotUsed(callData)) {
-
-	//vtkRenderWindowInteractor *iren = vtkRenderWindowInteractor::SafeDownCast(caller);
-	
-}
-
 
 
 //--------------------- SOME USEFULL FUNCTIONS ---------------------------

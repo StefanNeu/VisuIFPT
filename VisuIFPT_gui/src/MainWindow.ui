@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1022</width>
-    <height>676</height>
+    <width>927</width>
+    <height>802</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -69,9 +69,9 @@
       <item>
        <widget class="QTreeWidget" name="mainWindow_actorList">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
           <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
+          <verstretch>23</verstretch>
          </sizepolicy>
         </property>
         <property name="focusPolicy">
@@ -117,233 +117,108 @@
      </layout>
     </item>
     <item>
-     <widget class="QGroupBox" name="inspector">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>6</number>
       </property>
-      <property name="minimumSize">
-       <size>
-        <width>90</width>
-        <height>120</height>
-       </size>
+      <property name="sizeConstraint">
+       <enum>QLayout::SetDefaultConstraint</enum>
       </property>
-      <property name="title">
-       <string>Inspector</string>
-      </property>
-      <widget class="QLabel" name="coordinates">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>90</y>
-         <width>481</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>TextLabel</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-      <widget class="QFrame" name="transform_data">
-       <property name="geometry">
-        <rect>
-         <x>540</x>
-         <y>10</y>
-         <width>451</width>
-         <height>101</height>
-        </rect>
-       </property>
-       <property name="autoFillBackground">
-        <bool>true</bool>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::Panel</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Raised</enum>
-       </property>
-       <widget class="QLineEdit" name="x_loc">
-        <property name="geometry">
-         <rect>
-          <x>160</x>
-          <y>10</y>
-          <width>51</width>
-          <height>20</height>
-         </rect>
+      <item>
+       <widget class="QWidget" name="widget" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>68</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-       </widget>
-       <widget class="QLineEdit" name="y_loc">
-        <property name="geometry">
-         <rect>
-          <x>280</x>
-          <y>10</y>
-          <width>51</width>
-          <height>20</height>
-         </rect>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
         </property>
-       </widget>
-       <widget class="QLineEdit" name="z_loc">
-        <property name="geometry">
-         <rect>
-          <x>390</x>
-          <y>10</y>
-          <width>51</width>
-          <height>20</height>
-         </rect>
+        <property name="sizeIncrement">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
         </property>
+        <widget class="QCheckBox" name="checkBox_autoCamRepos">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>20</y>
+           <width>159</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Automatic camera reposition</string>
+         </property>
+        </widget>
        </widget>
-       <widget class="QLineEdit" name="x_rot">
-        <property name="geometry">
-         <rect>
-          <x>160</x>
-          <y>40</y>
-          <width>51</width>
-          <height>20</height>
-         </rect>
+      </item>
+      <item>
+       <widget class="QTreeWidget" name="property_list">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>54</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-       </widget>
-       <widget class="QLineEdit" name="x_scale">
-        <property name="geometry">
-         <rect>
-          <x>160</x>
-          <y>70</y>
-          <width>51</width>
-          <height>20</height>
-         </rect>
+        <property name="minimumSize">
+         <size>
+          <width>10</width>
+          <height>0</height>
+         </size>
         </property>
-       </widget>
-       <widget class="QLineEdit" name="y_rot">
-        <property name="geometry">
-         <rect>
-          <x>280</x>
-          <y>40</y>
-          <width>51</width>
-          <height>20</height>
-         </rect>
+        <property name="sizeIncrement">
+         <size>
+          <width>38</width>
+          <height>10</height>
+         </size>
         </property>
-       </widget>
-       <widget class="QLineEdit" name="y_scale">
-        <property name="geometry">
-         <rect>
-          <x>280</x>
-          <y>70</y>
-          <width>51</width>
-          <height>20</height>
-         </rect>
+        <property name="columnCount">
+         <number>2</number>
         </property>
+        <attribute name="headerVisible">
+         <bool>true</bool>
+        </attribute>
+        <attribute name="headerCascadingSectionResizes">
+         <bool>false</bool>
+        </attribute>
+        <attribute name="headerDefaultSectionSize">
+         <number>127</number>
+        </attribute>
+        <attribute name="headerHighlightSections">
+         <bool>false</bool>
+        </attribute>
+        <attribute name="headerMinimumSectionSize">
+         <number>62</number>
+        </attribute>
+        <attribute name="headerShowSortIndicator" stdset="0">
+         <bool>true</bool>
+        </attribute>
+        <column>
+         <property name="text">
+          <string>Property</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Value</string>
+         </property>
+        </column>
        </widget>
-       <widget class="QLineEdit" name="z_rot">
-        <property name="geometry">
-         <rect>
-          <x>390</x>
-          <y>40</y>
-          <width>51</width>
-          <height>20</height>
-         </rect>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="z_scale">
-        <property name="geometry">
-         <rect>
-          <x>390</x>
-          <y>70</y>
-          <width>51</width>
-          <height>20</height>
-         </rect>
-        </property>
-       </widget>
-      </widget>
-      <widget class="QLabel" name="location">
-       <property name="geometry">
-        <rect>
-         <x>550</x>
-         <y>20</y>
-         <width>61</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Location:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="rotation">
-       <property name="geometry">
-        <rect>
-         <x>550</x>
-         <y>50</y>
-         <width>60</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Rotation:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="scale">
-       <property name="geometry">
-        <rect>
-         <x>550</x>
-         <y>80</y>
-         <width>60</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Scale:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="checkBox_autoCamRepos">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>30</y>
-         <width>161</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Automatic camera reposition</string>
-       </property>
-      </widget>
-     </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
@@ -352,7 +227,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1022</width>
+     <width>927</width>
      <height>21</height>
     </rect>
    </property>
