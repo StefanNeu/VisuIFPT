@@ -60,6 +60,8 @@ MainWindow::MainWindow()
 	//sets up all Qt objects (see ui_MainWindow.h)
 	this->setupUi(this);
 
+	property_list->setSortingEnabled(false);
+
 	//create a vtkRenderWindow, that we want to assign to the QVTKViewer
 	vtkRenderWindow* renwin = vtkRenderWindow::New();			
 	VTKViewer->SetRenderWindow(renwin);
@@ -133,7 +135,7 @@ MainWindow::MainWindow()
 	connect(mainWindow_actorList, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(prepareMenu(const QPoint&)));
 
 	//updating the transform-data in the inspector, when item in actors-list is clicked
-	connect(mainWindow_actorList, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this, SLOT(displayTransformData(QTreeWidgetItem*, int)));
+	connect(mainWindow_actorList, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this, SLOT(displayActorData(QTreeWidgetItem*, int)));
 
 	//open the Configurator-window
 	connect(actionOpen_Config, SIGNAL(triggered()), this, SLOT(openConfigurator()));
@@ -169,7 +171,7 @@ MainWindow::~MainWindow()
 //------------------- SLOT FUNCTIONS -----------------------------
 
 //Slot for transform-data.
-void MainWindow::displayTransformData(QTreeWidgetItem* item, int) {
+void MainWindow::displayActorData(QTreeWidgetItem* item, int) {
 
 	//we want to clear the list everytime we display all (and maybe sometimes different) property of actors
 	property_list->clear();
@@ -189,16 +191,20 @@ void MainWindow::displayTransformData(QTreeWidgetItem* item, int) {
 
 	//we need to find out, if we clicked on an item with an actor or assembly-reference
 	//(assemblies come from the configurator)
-	if (actorlist_contextmenu_item->getActorReference() == NULL) {
+	if (actorlist_contextmenu_item->getActorReference() != NULL) {
+		transformation->SetMatrix(actorlist_contextmenu_item->getActorReference()->GetMatrix());
+	}
+	else if (actorlist_contextmenu_item->getAssemblyReference() != NULL) {
 		transformation->SetMatrix(actorlist_contextmenu_item->getAssemblyReference()->GetMatrix());
 	}
-	else if (actorlist_contextmenu_item->getAssemblyReference() == NULL) {
-		transformation->SetMatrix(actorlist_contextmenu_item->getActorReference()->GetMatrix());
+	else if (actorlist_contextmenu_item->getYamlActor() != NULL) {
+		transformation->SetMatrix(actorlist_contextmenu_item->getYamlActor()->GetMatrix());
 	}
 
 	transformation->GetPosition(location_data);
 	transformation->GetOrientation(rotation_data);
 	
+
 
 	//------------------------ POSITION ------------------------------
 	//we need to cut off a little bit, off the too long double string
@@ -237,6 +243,9 @@ void MainWindow::displayTransformData(QTreeWidgetItem* item, int) {
 	rotation->setText(0, QString::fromStdString("Rotation"));
 	rotation->setText(1, QString::fromStdString("x=" + x_stringROT + "     y=" + y_stringROT + "     z=" + z_stringROT));
 
+	if (actorlist_contextmenu_item->getYamlActor() != NULL) {
+		displayYAMLdata(property_list, actorlist_contextmenu_item->getYamlActor()->dataNode);
+	}
 }
 
 //Slot for opening 3D-files.
@@ -282,11 +291,14 @@ void MainWindow::deleteActor() {
 	//so we can easily remove the actor when removing the item
 
 	//we need to test if the item has an assembly or actor reference
-	if (actorlist_contextmenu_item->getActorReference() == NULL) {
+	if (actorlist_contextmenu_item->getActorReference() != NULL) {
+		Ren1->RemoveActor(actorlist_contextmenu_item->getActorReference());
+	}
+	else if (actorlist_contextmenu_item->getAssemblyReference() != NULL) {
 		Ren1->RemoveActor(actorlist_contextmenu_item->getAssemblyReference());
 	}
-	else {
-		Ren1->RemoveActor(actorlist_contextmenu_item->getActorReference());
+	else if (actorlist_contextmenu_item->getYamlActor() != NULL) {
+		Ren1->RemoveActor(actorlist_contextmenu_item->getYamlActor());
 	}
 	
 	delete actorlist_contextmenu_item;
@@ -298,11 +310,14 @@ void MainWindow::deleteActor() {
 //Slot for deactivating an actor/make him invisible
 void MainWindow::deactivateActor() {
 
-	if (actorlist_contextmenu_item->getActorReference() == NULL) {
+	if (actorlist_contextmenu_item->getActorReference() != NULL) {
+		actorlist_contextmenu_item->getActorReference()->VisibilityOff();
+	}
+	else if(actorlist_contextmenu_item->getAssemblyReference() != NULL){
 		actorlist_contextmenu_item->getAssemblyReference()->VisibilityOff();
 	}
-	else {
-		actorlist_contextmenu_item->getActorReference()->VisibilityOff();
+	else if (actorlist_contextmenu_item->getYamlActor() != NULL) {
+		actorlist_contextmenu_item->getYamlActor()->VisibilityOff();
 	}
 
 	VTKViewer->update();
@@ -311,11 +326,14 @@ void MainWindow::deactivateActor() {
 //Slot for reactivating an actor/make him visibile again
 void MainWindow::reactivateActor() {
 
-	if (actorlist_contextmenu_item->getActorReference() == NULL) {
+	if (actorlist_contextmenu_item->getActorReference() != NULL) {
+		actorlist_contextmenu_item->getActorReference()->VisibilityOn();
+	}
+	else if(actorlist_contextmenu_item->getAssemblyReference() != NULL){
 		actorlist_contextmenu_item->getAssemblyReference()->VisibilityOn();
 	}
-	else {
-		actorlist_contextmenu_item->getActorReference()->VisibilityOn();
+	else if (actorlist_contextmenu_item->getYamlActor() != NULL) {
+		actorlist_contextmenu_item->getYamlActor()->VisibilityOn();
 	}
 
 	VTKViewer->update();
@@ -409,7 +427,7 @@ void MainWindow::updateMainWindow() {
 	if (actorlist_contextmenu_item != NULL) {
 
 		//we just use the other slot function again
-		//displayTransformData(actorlist_contextmenu_item, 1);
+		//displayActorData(actorlist_contextmenu_item, 1);
 		
 	}
 }
@@ -430,8 +448,10 @@ void MainWindow::openYAML() {
 				YAML::Emitter yaml_emit;
 				yaml_emit << node1;
 
-				vtkSmartPointer<vtkActor> boundBox_actor =
-					vtkSmartPointer<vtkActor>::New();
+				//vtkSmartPointer<vtkActor> boundBox_actor =
+				//	vtkSmartPointer<vtkActor>::New();
+			
+				vtk_yamlActor* boundBox_actor = new vtk_yamlActor(node1);
 
 				Q_actorTreeWidgetItem* new_actor = new Q_actorTreeWidgetItem(mainWindow_actorList, boundBox_actor, 1);
 				new_actor->setText(0, QString::fromStdString(node1["name"].as<std::string>()));
@@ -442,7 +462,7 @@ void MainWindow::openYAML() {
 					transform_data[i] = node1["transformation"][i].as<double>();
 				}
 
-				//TODO: change size of array to the real size of the sequence, so we dont access other storage is sequence is bigger than 16
+
 				double* geometry_origin = new double[node1["geometry"]["origin"].size()];
 				for (int i = 0; i < node1["geometry"]["origin"].size(); i++) {
 					geometry_origin[i] = node1["geometry"]["origin"][i].as<double>();
@@ -458,10 +478,7 @@ void MainWindow::openYAML() {
 					vtkSmartPointer<vtkCubeSource>::New();
 				bounding_box->SetBounds(0.0, geometry_dimensions[0], 0.0, geometry_dimensions[1], 0.0, geometry_dimensions[2]);
 				bounding_box->SetCenter(0.0, 0.0, 0.0);
-				bounding_box->Update();
-
-			
-				
+				bounding_box->Update();		
 
 				vtkSmartPointer<vtkMatrix4x4> transform_matrix =
 					vtkSmartPointer<vtkMatrix4x4>::New();
@@ -481,10 +498,6 @@ void MainWindow::openYAML() {
 				boundBox_actor->SetMapper(bounding_mapper);
 				boundBox_actor->GetProperty()->SetRepresentationToWireframe();
 				Ren1->AddActor(boundBox_actor);
-				
-
-				
-				
 
 			}
 		}

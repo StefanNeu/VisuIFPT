@@ -17,6 +17,11 @@
 
 #include <string>
 
+
+vtk_yamlActor::vtk_yamlActor(YAML::Node correspondingNode) {
+	dataNode = correspondingNode;
+}
+
 //Put in two strings and function puts out current interactorstyles
 /*void vtk_InteractorMode::getMode(std::string &cam_or_ac, std::string &joy_or_track) {
 
@@ -204,4 +209,23 @@ void spawnGeoPrimitives(QAction* primitive, vtkRenderer* renderer, QTreeWidget* 
 	Q_actorTreeWidgetItem* new_actor = new Q_actorTreeWidgetItem(item_list, actor, 1);
 	new_actor->setText(0, QString::fromStdString(item_name));
 
+}
+
+void displayYAMLdata(QTreeWidget* propertylist, YAML::Node node) {
+	
+	YAML::const_iterator iterator = node.begin();
+	iterator++;
+
+		QTreeWidgetItem* new_property = new QTreeWidgetItem(propertylist, 1);
+		new_property->setText(0, QString::fromStdString(iterator->first.as<std::string>()));
+		new_property->setText(1, QString::fromStdString(iterator->second.as<std::string>()));
+
+		++iterator;
+
+		QTreeWidgetItem* new_property2 = new QTreeWidgetItem(propertylist, 1);
+		new_property2->setText(0, QString::fromStdString(iterator->first.as<std::string>()));
+		new_property2->setText(1, QString::fromStdString(iterator->second.as<std::string>()));
+
+
+	
 }

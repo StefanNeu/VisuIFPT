@@ -53,7 +53,7 @@ public slots:
 	void reactivateActor();
 
 	//Display the transform-data of the referenced vtkActor of this item
-	void displayTransformData(QTreeWidgetItem*, int);
+	void displayActorData(QTreeWidgetItem*, int);
 
 	//Opens the Configurator-Window
 	void openConfigurator();
