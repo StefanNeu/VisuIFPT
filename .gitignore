@@ -2,4 +2,6 @@ Qt_Examples/
 Tests/
 VisuIFPT_gui/bin/
 VisuIFPT_cmd/bin/
-/VisuIFPT_gui/src/.vs
+VisuIFPT_gui/src/.vs
+ObjectViewer/src/.vs
+ObjectViewer/bin/
