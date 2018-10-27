@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>VisuIFPT</string>
+   <string>ObjectViewer</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="layoutDirection">
@@ -80,6 +80,25 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="pushButton_6">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>120</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Reset Light</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="pushButton_4">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -94,7 +113,7 @@
          </size>
         </property>
         <property name="text">
-         <string>Toolbox</string>
+         <string>Open Toolbox</string>
         </property>
        </widget>
       </item>
@@ -115,15 +134,15 @@
        </spacer>
       </item>
       <item>
-       <widget class="QToolButton" name="toolButton">
+       <widget class="QPushButton" name="pushButton_7">
         <property name="minimumSize">
          <size>
-          <width>30</width>
+          <width>100</width>
           <height>0</height>
          </size>
         </property>
         <property name="text">
-         <string>...</string>
+         <string>Toolbox Options</string>
         </property>
        </widget>
       </item>
@@ -147,19 +166,59 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QVTKWidget" name="VTKViewer" native="true">
+       <widget class="QTabWidget" name="tabWidget">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
         <property name="minimumSize">
          <size>
-          <width>800</width>
-          <height>665</height>
+          <width>920</width>
+          <height>0</height>
          </size>
         </property>
+        <property name="currentIndex">
+         <number>1</number>
+        </property>
+        <widget class="QWidget" name="tab">
+         <attribute name="title">
+          <string>Global Scene</string>
+         </attribute>
+        </widget>
+        <widget class="QWidget" name="Scene1">
+         <attribute name="title">
+          <string>Scene 1</string>
+         </attribute>
+         <widget class="QVTKWidget" name="VTKViewer" native="true">
+          <property name="geometry">
+           <rect>
+            <x>5</x>
+            <y>5</y>
+            <width>904</width>
+            <height>641</height>
+           </rect>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>730</width>
+            <height>500</height>
+           </size>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="tab_2">
+         <attribute name="title">
+          <string>Scene 2</string>
+         </attribute>
+        </widget>
        </widget>
       </item>
       <item>
@@ -170,15 +229,15 @@
         <item>
          <widget class="QTreeWidget" name="treeWidget">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
             <horstretch>0</horstretch>
             <verstretch>1</verstretch>
            </sizepolicy>
           </property>
           <property name="minimumSize">
            <size>
-            <width>0</width>
-            <height>300</height>
+            <width>420</width>
+            <height>400</height>
            </size>
           </property>
           <property name="allColumnsShowFocus">
@@ -194,7 +253,7 @@
            <bool>false</bool>
           </attribute>
           <attribute name="headerDefaultSectionSize">
-           <number>150</number>
+           <number>130</number>
           </attribute>
           <attribute name="headerHighlightSections">
            <bool>true</bool>
@@ -236,7 +295,7 @@
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>40</width>
+              <width>160</width>
               <height>20</height>
              </size>
             </property>
@@ -245,19 +304,57 @@
           <item>
            <widget class="QPushButton" name="addKey">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="minimumSize">
              <size>
-              <width>60</width>
+              <width>80</width>
               <height>0</height>
              </size>
             </property>
             <property name="text">
              <string>Add Key</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_5">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>80</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Edit Key</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>80</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Delete Key</string>
             </property>
            </widget>
           </item>
@@ -271,7 +368,7 @@
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>40</width>
+              <width>160</width>
               <height>20</height>
              </size>
             </property>

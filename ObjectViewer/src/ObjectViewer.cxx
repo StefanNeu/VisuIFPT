@@ -78,18 +78,31 @@ ObjectViewer::ObjectViewer()
 	QTreeWidgetItem* test_item = new QTreeWidgetItem(treeWidget);
 	test_item->setText(0, QString("Object1"));
 
+	QTreeWidgetItem* test_property0 = new QTreeWidgetItem(test_item);
+	test_property0->setText(0, QString("General Data"));
+
+	QTreeWidgetItem* test_property22 = new QTreeWidgetItem(test_property0);
+	test_property22->setText(0, QString("Object Information"));
+	test_property22->setText(1, QString("String"));
+	test_property22->setText(2, QString("STL-Model of a Deer"));
+
+	QTreeWidgetItem* test_property33 = new QTreeWidgetItem(test_property0);
+	test_property33->setText(0, QString("Release Ready?"));
+	test_property33->setText(1, QString("Bool"));
+	test_property33->setText(2, QString("False"));
+
 	QTreeWidgetItem* test_property1 = new QTreeWidgetItem(test_item);
 	test_property1->setText(0, QString("Transform Data"));
 
 	QTreeWidgetItem* test_property2 = new QTreeWidgetItem(test_property1);
 	test_property2->setText(0, QString("Location"));
 	test_property2->setText(1, QString("Float"));
-	test_property2->setText(2, QString("x= 14.52  y= 7.89  z= 57.11"));
+	test_property2->setText(2, QString("x= 14.52  y=  7.89  z= 57.11"));			//ist ja eigentlich ein float array
 
 	QTreeWidgetItem* test_property3 = new QTreeWidgetItem(test_property1);
 	test_property3->setText(0, QString("Rotation"));
 	test_property3->setText(1, QString("Float"));
-	test_property3->setText(2, QString("x= 78.12  y= 53.22  z= 4.32"));
+	test_property3->setText(2, QString("x= 78.12  y= 53.22  z=  4.32"));
 
 
 	QTreeWidgetItem* test_property4 = new QTreeWidgetItem(test_item);
