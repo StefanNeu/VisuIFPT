@@ -97,12 +97,12 @@ ObjectViewer::ObjectViewer()
 	QTreeWidgetItem* test_property2 = new QTreeWidgetItem(test_property1);
 	test_property2->setText(0, QString("Location"));
 	test_property2->setText(1, QString("Float"));
-	test_property2->setText(2, QString("x= 14.52  y=  7.89  z= 57.11"));			//ist ja eigentlich ein float array
+	test_property2->setText(2, QString("x= 14.52  y= 07.89  z= 57.11"));			//ist ja eigentlich ein float array
 
 	QTreeWidgetItem* test_property3 = new QTreeWidgetItem(test_property1);
 	test_property3->setText(0, QString("Rotation"));
 	test_property3->setText(1, QString("Float"));
-	test_property3->setText(2, QString("x= 78.12  y= 53.22  z=  4.32"));
+	test_property3->setText(2, QString("x= 78.12  y= 53.22  z= 04.32"));
 
 
 	QTreeWidgetItem* test_property4 = new QTreeWidgetItem(test_item);

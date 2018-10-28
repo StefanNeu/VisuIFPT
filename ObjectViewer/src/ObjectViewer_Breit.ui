@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1030</width>
-    <height>894</height>
+    <width>1434</width>
+    <height>744</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -127,7 +127,7 @@
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>400</width>
+          <width>1000</width>
           <height>20</height>
          </size>
         </property>
@@ -175,7 +175,7 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>550</width>
+          <width>920</width>
           <height>0</height>
          </size>
         </property>
@@ -196,8 +196,8 @@
            <rect>
             <x>5</x>
             <y>5</y>
-            <width>534</width>
-            <height>790</height>
+            <width>904</width>
+            <height>641</height>
            </rect>
           </property>
           <property name="sizePolicy">
@@ -208,7 +208,7 @@
           </property>
           <property name="minimumSize">
            <size>
-            <width>200</width>
+            <width>730</width>
             <height>500</height>
            </size>
           </property>
@@ -236,7 +236,7 @@
           </property>
           <property name="minimumSize">
            <size>
-            <width>300</width>
+            <width>420</width>
             <height>400</height>
            </size>
           </property>
@@ -253,7 +253,7 @@
            <bool>false</bool>
           </attribute>
           <attribute name="headerDefaultSectionSize">
-           <number>110</number>
+           <number>130</number>
           </attribute>
           <attribute name="headerHighlightSections">
            <bool>true</bool>
@@ -295,7 +295,7 @@
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>80</width>
+              <width>160</width>
               <height>20</height>
              </size>
             </property>
@@ -368,7 +368,7 @@
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>80</width>
+              <width>160</width>
               <height>20</height>
              </size>
             </property>
@@ -387,7 +387,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1030</width>
+     <width>1434</width>
      <height>21</height>
     </rect>
    </property>
